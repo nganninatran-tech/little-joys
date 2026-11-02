@@ -41,9 +41,15 @@ swift_ref = root.new_file('LittleJoysWidget.swift')
 root.new_file('Info.plist')
 
 widget = project.new_target(:app_extension, 'LittleJoysWidgetExtension', :ios, '17.0')
+# xcodeproj may leave the output name blank; explicitly name the .appex product.
+widget.product_reference.path = 'LittleJoysWidgetExtension.appex'
+widget.product_reference.name = 'LittleJoysWidgetExtension.appex'
 widget.source_build_phase.add_file_reference(swift_ref)
 widget.build_configurations.each do |config|
   settings = config.build_settings
+  settings['PRODUCT_NAME'] = 'LittleJoysWidgetExtension'
+  settings['EXECUTABLE_NAME'] = 'LittleJoysWidgetExtension'
+  settings['WRAPPER_EXTENSION'] = 'appex'
   settings['PRODUCT_BUNDLE_IDENTIFIER'] = 'com.littlejoys.preview.widget'
   settings['SWIFT_VERSION'] = '5.0'
   settings['IPHONEOS_DEPLOYMENT_TARGET'] = '17.0'
