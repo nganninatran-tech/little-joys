@@ -6,22 +6,17 @@ workflows:
     environment:
       node: 22
       xcode: latest
-      cocoapods: default
     scripts:
       - name: Install Little Joys dependencies
         script: npm install
-      - name: Generate the iPhone project
-        script: npx cap add ios
-      - name: Install iOS dependencies
-        script: |
-          cd ios/App
-          pod install
+      - name: Generate the iPhone project (Swift Package Manager)
+        script: npx cap add ios --packagemanager SPM
       - name: Copy Little Joys into iOS
         script: npx cap sync ios
       - name: Build unsigned iPhone simulator app
         script: |
           xcodebuild \
-            -workspace ios/App/App.xcworkspace \
+            -project ios/App/App.xcodeproj \
             -scheme App \
             -configuration Debug \
             -sdk iphonesimulator \
