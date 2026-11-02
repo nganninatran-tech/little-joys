@@ -1,0 +1,34 @@
+workflows:
+  little-joys-ios-preview:
+    name: Little Joys iOS Simulator Preview
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      node: 22
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Install Little Joys dependencies
+        script: npm install
+      - name: Generate the iPhone project
+        script: npx cap add ios
+      - name: Install iOS dependencies
+        script: |
+          cd ios/App
+          pod install
+      - name: Copy Little Joys into iOS
+        script: npx cap sync ios
+      - name: Build unsigned iPhone simulator app
+        script: |
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$CM_BUILD_DIR/ios-derived" \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+    artifacts:
+      - ios-derived/Build/Products/Debug-iphonesimulator/*.app
+      - /tmp/xcodebuild_logs/*.log
