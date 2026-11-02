@@ -1,0 +1,25 @@
+{
+  "name": "Little Joys \u2014 the little things count",
+  "short_name": "Little Joys",
+  "description": "Notice a laugh, remember a happy moment, share a little joy.",
+  "id": "./",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#fffdf6",
+  "theme_color": "#fff8de",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

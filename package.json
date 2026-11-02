@@ -1,0 +1,21 @@
+{
+  "name": "little-joys-mobile",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Little Joys native app starter based on the Hourly Sunshine prototype",
+  "scripts": {
+    "android": "npx cap open android",
+    "ios": "npx cap open ios",
+    "sync": "npx cap sync",
+    "add:android": "npx cap add android",
+    "add:ios": "npx cap add ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "8.5.2",
+    "@capacitor/android": "8.5.2",
+    "@capacitor/ios": "8.5.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.2"
+  }
+}

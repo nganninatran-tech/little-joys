@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fff8de">
+  <meta name="description" content="Little Joys helps you notice laughter, remember happy moments, and share the little things that make life lovely.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Little Joys">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+  <title>Little Joys — the little things count</title>
+</head>
+<body>
+  <div class="backdrop-ornament ornament-one" aria-hidden="true"></div>
+  <div class="backdrop-ornament ornament-two" aria-hidden="true"></div>
+  <div class="page-layout">
+    <aside class="story-panel" aria-label="About Little Joys">
+      <div class="story-eyebrow"><span id="story-smile-anchor"></span> AN APP FOR THE LITTLE THINGS</div>
+      <h1>The little<br>things <em>count.</em></h1>
+      <p>That laugh you almost forgot. The smile you didn’t notice. A small moment worth keeping.</p>
+      <div class="story-quote">“You don’t have to be happy all the time to appreciate a happy moment.”</div>
+      <div class="story-footer">made for noticing, not measuring <span><svg class="face-art" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle cx="31" cy="37" r="7.5" fill="currentColor"/><circle cx="69" cy="37" r="7.5" fill="currentColor"/><path d="M25 59.5Q50 87 75 59.5" fill="none" stroke="currentColor" stroke-width="8.5" stroke-linecap="round"/></svg></span></div>
+    </aside>
+    <div class="phone-frame">
+      <main class="app-shell" id="app-shell">
+        <header class="app-topbar">
+          <div class="brand-lockup"><span id="brand-smile-anchor"></span><span>little joys<span class="brand-period">.</span></span></div>
+          <span class="topbar-whisper">a softer kind of tracker</span>
+        </header>
+        <div id="app-content" class="app-content" tabindex="-1"></div>
+        <nav class="bottom-nav" aria-label="Main navigation">
+          <button type="button" class="nav-item active" data-tab="today" aria-current="page"><span data-icon="sun"></span><span>Today</span></button>
+          <button type="button" class="nav-item" data-tab="journal"><span data-icon="book"></span><span>Journal</span></button>
+          <button type="button" class="nav-item" data-tab="patterns"><span data-icon="chart"></span><span>Reflections</span></button>
+          <button type="button" class="nav-item" data-tab="together"><span data-icon="hearts"></span><span>Together</span></button>
+          <button type="button" class="nav-item" data-tab="you"><span data-icon="settings"></span><span>You</span></button>
+        </nav>
+      </main>
+    </div>
+  </div>
+  <dialog class="note-dialog" id="note-dialog" aria-labelledby="dialog-title">
+    <form method="dialog" id="note-form" class="note-dialog-inner">
+      <div class="dialog-handle" aria-hidden="true"></div>
+      <div class="dialog-top"><span class="eyebrow" id="dialog-kind">A LITTLE MOMENT</span><button class="icon-button" type="button" id="close-dialog" aria-label="Close">×</button></div>
+      <h2 id="dialog-title">What made this moment special?</h2>
+      <p>Keep a photo, a little note, or simply the feeling. Only you can see it unless you choose to share.</p>
+      <label class="sr-only" for="moment-note">Memory note</label>
+      <textarea id="moment-note" maxlength="300" rows="5" placeholder="Something lovely happened..." autocomplete="off"></textarea>
+      <div class="photo-actions" aria-label="Add a photo to this moment">
+        <button type="button" class="photo-action" id="take-photo"><span data-photo-icon="camera"></span> Take photo</button>
+        <button type="button" class="photo-action" id="choose-photo"><span data-photo-icon="image"></span> Choose photo</button>
+      </div>
+      <div id="photo-preview" class="photo-preview" hidden></div>
+      <input class="sr-only" type="file" id="take-photo-input" accept="image/*" capture="environment" aria-label="Take photo with camera">
+      <input class="sr-only" type="file" id="choose-photo-input" accept="image/*" aria-label="Choose a photo from gallery">
+      <div class="dialog-bottom"><span id="note-counter">0 / 300</span><button type="submit" class="primary-button">Save memory <span aria-hidden="true">↗</span></button></div>
+    </form>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  <input type="file" id="import-file" accept="application/json,.json" class="sr-only" aria-label="Import a Little Joys journal">
+  <script src="app.js" defer></script>
+</body>
+</html>
