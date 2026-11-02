@@ -6,14 +6,23 @@ import AppIntents
 // both the app and widget target, and bridge these events to the app journal.
 private enum JoyStorage {
     static let suite = "group.com.littlejoys.app"
-    static func count(_ type: String) -> Int {
-        UserDefaults(suiteName: suite)?.integer(forKey: "joys.\(type).\(dayKey)") ?? 0
-    }
+    static let eventsKey = "joys.events.v1"
     static var dayKey: String {
         let fmt = DateFormatter(); fmt.dateFormat = "yyyy-MM-dd"; return fmt.string(from: Date())
     }
+    static func count(_ type: String) -> Int {
+        UserDefaults(suiteName: suite)?.integer(forKey: "joys.\(type).\(dayKey)") ?? 0
+    }
     static func add(_ type: String) {
         guard let prefs = UserDefaults(suiteName: suite) else { return }
+        let event: [String: String] = [
+            "id": UUID().uuidString,
+            "type": type == "happy" ? "joy" : "laugh",
+            "timestamp": ISO8601DateFormatter().string(from: Date())
+        ]
+        var events = prefs.array(forKey: eventsKey) as? [[String:String]] ?? []
+        events.append(event)
+        prefs.set(events, forKey: eventsKey)
         let key = "joys.\(type).\(dayKey)"
         prefs.set(prefs.integer(forKey: key) + 1, forKey: key)
         WidgetCenter.shared.reloadAllTimelines()
