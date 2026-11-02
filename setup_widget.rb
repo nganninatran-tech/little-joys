@@ -66,5 +66,45 @@ embed.name = 'Embed App Extensions'
 embed.dst_subfolder_spec = '13'
 embed.add_file_reference(widget.product_reference)
 app.build_phases << embed
+# Install native bridge in Capacitor's App target and register with a custom view controller.
+bridge_dir = 'ios/App/App/JoyBridge'
+FileUtils.mkdir_p(bridge_dir)
+FileUtils.cp('NativeBridge/JoyBridgePlugin.swift', File.join(bridge_dir, 'JoyBridgePlugin.swift'))
+File.write(File.join(bridge_dir, 'JoyViewController.swift'), <<~SWIFT)
+  import UIKit
+  import Capacitor
+  class JoyViewController: CAPBridgeViewController {
+      override open func capacitorDidLoad() {
+          bridge?.registerPluginInstance(JoyBridgePlugin())
+      }
+  }
+SWIFT
+bridge_group = project.main_group.find_subpath('JoyBridge', true)
+bridge_group.set_source_tree('SOURCE_ROOT')
+bridge_group.set_path('App/JoyBridge')
+%w[JoyBridgePlugin.swift JoyViewController.swift].each do |name|
+  ref = bridge_group.new_file(name)
+  app.source_build_phase.add_file_reference(ref)
+end
+# Capacitor's generated storyboard must instantiate our controller subclass.
+storyboard = 'ios/App/App/Base.lproj/Main.storyboard'
+if File.exist?(storyboard)
+  xml = File.read(storyboard)
+  xml = xml.gsub('customClass="CAPBridgeViewController"', 'customClass="JoyViewController" customModule="App" customModuleProvider="target"')
+  File.write(storyboard, xml)
+end
+# App Groups: both targets need the same container identifier (device signing later).
+entitlements_dir = 'ios/App/App'
+app_ent = File.join(entitlements_dir, 'LittleJoys.entitlements')
+widget_ent = File.join(extension_dir, 'LittleJoysWidget.entitlements')
+app_groups = {'com.apple.security.application-groups' => ['group.com.littlejoys.app']}.to_plist
+File.write(app_ent, app_groups)
+File.write(widget_ent, app_groups)
+app.build_configurations.each do |cfg|
+  cfg.build_settings['CODE_SIGN_ENTITLEMENTS'] = 'App/LittleJoys.entitlements'
+end
+widget.build_configurations.each do |cfg|
+  cfg.build_settings['CODE_SIGN_ENTITLEMENTS'] = 'App/LittleJoysWidgetExtension/LittleJoysWidget.entitlements'
+end
 project.save
 puts 'Widget target added to generated Capacitor Xcode project.'
