@@ -1,5 +1,6 @@
 # Little Joys prototype: add a WidgetKit target to the generated Capacitor Xcode project.
 # Simulator compile test only. App Group + journal bridge not yet implemented.
+# Put extension sources and Info.plist under ios/App/App/, matching project file references.
 require 'xcodeproj'
 require 'fileutils'
 require 'plist'
@@ -17,7 +18,7 @@ if project.targets.any? { |t| t.name == 'LittleJoysWidgetExtension' }
   exit 0
 end
 
-extension_dir = 'ios/App/LittleJoysWidgetExtension'
+extension_dir = 'ios/App/App/LittleJoysWidgetExtension'
 FileUtils.mkdir_p(extension_dir)
 FileUtils.cp(source_path, File.join(extension_dir, 'LittleJoysWidget.swift'))
 info_path = File.join(extension_dir, 'Info.plist')
