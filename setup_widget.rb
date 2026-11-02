@@ -90,7 +90,9 @@ end
 storyboard = 'ios/App/App/Base.lproj/Main.storyboard'
 if File.exist?(storyboard)
   xml = File.read(storyboard)
-  xml = xml.gsub('customClass="CAPBridgeViewController"', 'customClass="JoyViewController" customModule="App" customModuleProvider="target"')
+  # Preserve the existing module attributes; only change the controller class.
+  # Adding customModule again creates invalid XML when Capacitor already declares it.
+  xml = xml.gsub('customClass="CAPBridgeViewController"', 'customClass="JoyViewController"')
   File.write(storyboard, xml)
 end
 # App Groups: both targets need the same container identifier (device signing later).
