@@ -441,8 +441,35 @@
   }
 
 
+  // Native iOS-only widget journal bridge. Does nothing in an ordinary browser.
+  const joyBridge = window.Capacitor?.isNativePlatform?.() && window.Capacitor?.getPlatform?.()==='ios'
+    ? window.Capacitor.registerPlugin('JoyBridge') : null;
+  let syncBusy=false;
+  async function syncWidgetJournal() {
+    if(!joyBridge || syncBusy)return;
+    syncBusy=true;
+    try {
+      const response=await joyBridge.getEvents();
+      const events=Array.isArray(response.events)?response.events:[];
+      const known=new Set(moments.map(m=>m.id));
+      let changed=false;
+      for(const e of events){
+        if(e && typeof e.id==='string' && !known.has(e.id) && (e.type==='laugh'||e.type==='joy')){
+          const m=cleanMoment({id:e.id,type:e.type,timestamp:e.timestamp,note:'',sample:false});
+          if(m){moments.push(m);known.add(m.id);changed=true;}
+        }
+      }
+      if(changed){moments.sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));persist();render();}
+      // Ack only after journal persists. Never drop entries on write failure.
+      if(events.length && localStorage.getItem(STORAGE_KEY)){
+        await joyBridge.ackEvents({ids:events.filter(e=>known.has(e.id)).map(e=>e.id)});
+      }
+      await joyBridge.setCounts({laugh:countTypes(todayMoments()).laugh,joy:countTypes(todayMoments()).joy});
+    }catch(error){console.warn('Widget synchronization unavailable:',error);}
+    finally{syncBusy=false;}
+  }
   function persist() {
-    try { localStorage.setItem(STORAGE_KEY,JSON.stringify(moments)); return true; }
+    try { localStorage.setItem(STORAGE_KEY,JSON.stringify(moments)); if(joyBridge) setTimeout(syncWidgetJournal,0); return true; }
     catch { showToast('Could not save on this device. Try freeing storage.'); return false; }
   }
   function showToast(message, actionLabel='', action) {
@@ -532,7 +559,7 @@
   function record(type, celebrate=false) {
     const previous=celebrate?countTypes(todayMoments())[type]:0;
     const item={id:randomId(),type,timestamp:new Date().toISOString(),note:'',sample:false};
-    moments.unshift(item);persist();render();
+    moments.unshift(item);persist();render();syncWidgetJournal();
     if(celebrate)celebrateSavedMoment(type,previous);
     showToast(type==='laugh'?'That little laugh is saved.':'That happy moment is saved.','Add a note',()=>openNote(item.id));
   }
@@ -798,6 +825,7 @@
   });
   window.addEventListener('storage',e=>{if(e.key===STORAGE_KEY){moments=loadMoments();render();}});
   document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden)syncWidgetJournal();
     if(document.hidden&&(mic.status==='on'||mic.status==='starting'))stopMic(true);
     if(!document.hidden){
       const hour=hourKey();
@@ -824,4 +852,6 @@
     window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
   }
   render();
+  syncWidgetJournal();
+  window.addEventListener('focus',syncWidgetJournal);
 })();
