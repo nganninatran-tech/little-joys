@@ -519,3 +519,32 @@ body{background:radial-gradient(circle at 13% 15%,#fff0b4 0,transparent 32%),rad
 .lj-bumble{background:linear-gradient(100deg,#fff9e7,#fffdf4);}
 .lj-week-card{background:#fffcf2}
 @media(prefers-reduced-motion:reduce){.lj-book-flower{transition:none}}
+
+/* Garden-first redesign: clear sunny storybook home, no duplicate dashboard */
+.lj-home-intro{padding:7px 2px 0}.lj-home-intro .welcome-title{font-size:31px;margin:5px 0 4px}.lj-home-intro p{font-size:12px;color:#997a49;margin:0 0 10px}
+.lj-garden{margin:10px 0 12px}.lj-quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.lj-quick-actions .moment-trigger{min-width:0;min-height:97px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;border-radius:21px}
+.lj-quick-actions .moment-trigger strong{font-size:13px}.lj-quick-actions .moment-trigger small{font-size:10px}
+.lj-photo-action{margin:6px 0}.lj-mini-stats{display:flex;justify-content:space-around;gap:8px;padding:11px;background:#fff7dd;color:#8f7148;border:1px solid #ecddb8;border-radius:14px;font-size:11px}.lj-mini-stats strong{font-size:16px;color:#76542e}
+.lj-today-bottom{margin-top:21px}.lj-sunshine-details,.lj-reflections-details,.lj-collection-details,.lj-microphone-details{margin:17px 0;border-radius:18px;border:1px solid #ead8ac;background:#fffbf0;overflow:hidden}
+.lj-sunshine-details summary,.lj-reflections-details summary,.lj-collection-details summary,.lj-microphone-details summary{padding:15px;cursor:pointer;font-size:13px;font-weight:650;color:#795936}
+.lj-sunshine-details>.sunshine-card,.lj-reflections-details>.week-card,.lj-collection-details>.lj-flowerbook,.lj-microphone-details>.mic-card{margin:8px 10px 14px}
+.lj-reflections-details{padding:0 10px 10px}.lj-reflections-details summary{margin:0 -10px}.lj-collection-details .lj-flowerbook{margin:10px}
+.lj-share-link{border:1px solid #e6d1a0;background:#fff3d7;color:#806138;border-radius:99px;padding:11px 14px;font-size:12px;font-weight:650;margin:9px 0}
+.lj-flower .lj-bloom-head{transform-origin:50px 54px;transition:transform .85s cubic-bezier(.2,1.3,.5,1),opacity .85s ease}
+.lj-flower .lj-bud-mark{transform-origin:50px 50px;transition:transform .7s ease,opacity .7s ease}
+.lj-flower.lj-stage-0 .lj-bloom-head{transform:scale(.07);opacity:.06}
+.lj-flower.lj-stage-1 .lj-bloom-head{transform:scale(.42);opacity:.8}
+.lj-flower.lj-stage-2 .lj-bloom-head{transform:scale(.72);opacity:.95}
+.lj-flower.lj-stage-3 .lj-bloom-head{transform:scale(1);opacity:1}
+.lj-flower.lj-stage-0 .lj-bud-mark{transform:scale(1);opacity:1}
+.lj-flower.lj-stage-1 .lj-bud-mark{transform:scale(.6);opacity:.75}
+.lj-flower.lj-stage-2 .lj-bud-mark{transform:scale(.28);opacity:.25}
+.lj-flower.lj-stage-3 .lj-bud-mark{transform:scale(0);opacity:0}
+.lj-water-drops{position:absolute;top:14%;left:39%;z-index:6;opacity:0;font-size:27px;pointer-events:none}
+.lj-watering .lj-water-drops{animation:lj-water 1.7s ease-out both}.lj-watering .lj-bee-fly{animation:lj-bee-dip 1.6s ease-in-out both}
+.lj-growing{animation:lj-bloom-pulse 1.6s ease both}
+@keyframes lj-water{0%{opacity:0;transform:translateY(-30px)}25%{opacity:1}75%{opacity:1}100%{opacity:0;transform:translateY(130px)}}
+@keyframes lj-bee-dip{0%,100%{transform:translateY(0)}50%{transform:translate(-18px,14px)}}
+@keyframes lj-bloom-pulse{0%,100%{filter:drop-shadow(0 0 0 transparent)}50%{filter:drop-shadow(0 0 13px #f6d77b)}}
+@media(prefers-reduced-motion:reduce){.lj-watering .lj-water-drops,.lj-watering .lj-bee-fly,.lj-growing{animation:none!important}.lj-flower .lj-bloom-head,.lj-flower .lj-bud-mark{transition:none!important}}
