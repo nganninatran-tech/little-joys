@@ -746,7 +746,22 @@
   }
   // Bumble faithfully follows the round, side-facing yellow-and-black bee reference.
   function bee(){return '<svg viewBox="0 0 160 130" role="img" aria-label="Bumble the bee"><g stroke="#171512" stroke-linecap="round" stroke-linejoin="round"><path d="M64 35 C65 15 85 7 101 19 C113 28 105 46 90 50Z" fill="#d6f0ff" stroke-width="3.5"/><path d="M88 40 C93 13 125 11 136 34 C143 56 117 66 98 51Z" fill="#e0f3ff" stroke-width="3.5"/><path d="M68 18Q80 30 89 21M66 31Q82 40 100 35M85 17Q85 33 102 47M102 18Q104 40 127 41M119 20Q116 35 139 35M101 50Q113 40 125 61" fill="none" stroke-width="2.2"/><path d="M63 51 C81 41 128 45 140 70 C155 104 124 120 91 113 L66 101Z" fill="#302c25" stroke-width="4"/><path d="M86 47Q99 46 107 54Q122 82 110 114L87 113Q94 78 79 49Z" fill="#ffdc59" stroke="none"/><path d="M129 58Q143 71 143 91Q141 102 137 106L128 103Q136 83 121 53Z" fill="#ffdb59" stroke="none"/><path d="M65 48 C37 38 14 50 10 72 C2 103 31 118 57 111 C79 105 93 91 87 67 C84 56 77 50 65 48Z" fill="#ffdb57" stroke-width="4"/><path d="M37 49Q31 32 23 27M61 47Q62 30 54 25" fill="none" stroke-width="4"/><circle cx="23" cy="25" r="6" fill="#ff9c42" stroke="none"/><circle cx="54" cy="23" r="6" fill="#ff9c42" stroke="none"/><circle cx="27" cy="76" r="2.8" fill="#151410" stroke="none"/><circle cx="60" cy="76" r="2.8" fill="#151410" stroke="none"/><path d="M39 78Q44 91 50 79" fill="none" stroke-width="4.5"/><circle cx="22" cy="85" r="5" fill="#f88e70" stroke="none"/><circle cx="67" cy="86" r="5" fill="#f88e70" stroke="none"/></g></svg>';}
-  function positions(entries){const joys=entries.filter(m=>m.type==='joy').sort((a,b)=>String(a.timestamp).localeCompare(String(b.timestamp)));return joys.map((m,i)=>({m,x:10+(i%6)*15+rnd(m.id,'x')*5,y:75-Math.floor(i/6)*19+rnd(m.id,'y')*5,s:.85+rnd(m.id,'size')*.3}));}
+  function positions(entries){
+    const joys=entries.filter(m=>m.type==='joy').sort((a,b)=>String(a.timestamp).localeCompare(String(b.timestamp)));
+    // Layered, staggered planting spots: distinct rows read as a meadow, not a grid.
+    const spots=[
+      [13,77,1.1],[39,70,.95],[71,79,1.15],[87,66,.92],
+      [25,57,.87],[56,54,.96],[78,47,.84],[10,45,.82],
+      [42,37,.82],[65,34,.78],[90,32,.72],[22,28,.7]
+    ];
+    return joys.map((m,i)=>{
+      const [baseX,baseY,baseS]=spots[i%spots.length];
+      const tier=Math.floor(i/spots.length);
+      const jitterX=(rnd(m.id,'x')-.5)*5;
+      const jitterY=(rnd(m.id,'y')-.5)*3;
+      return {m,x:Math.max(9,Math.min(91,baseX+jitterX)),y:Math.max(16,baseY+jitterY-tier*5),s:baseS*(.93+rnd(m.id,'size')*.12)};
+    });
+  }
   function growthStage(m,entries){const t=new Date(m.timestamp).getTime();return Math.min(3,entries.filter(x=>x.type==='laugh'&&new Date(x.timestamp).getTime()>t).length);}
   function celebrateLaugh(){
     if(currentTab!=='today')return;
@@ -768,12 +783,42 @@
     }
     window.setTimeout(()=>el.classList.remove('lj-watering'),1900);
   }
+  // A decorative storybook landscape. None of these count as a saved flower.
+  function gardenBackdrop(){
+    const blade=(x,y,h,angle=0)=>'<path d="M'+x+' '+y+'q'+angle+' -'+Math.round(h*.6)+' '+Math.round(angle*.5)+' -'+h+'" fill="none" stroke="#8ea77c" stroke-width="1.4" stroke-linecap="round" opacity=".6"/>';
+    let grasses='';
+    for(let i=0;i<40;i++){
+      const x=8+(i*37)%590,y=255+(i*19)%75;
+      grasses+=blade(x,y,8+i%4*3,i%2?5:-4);
+    }
+    return '<svg class="lj-landscape" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 360" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'+
+      '<defs><linearGradient id="lj-sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff0bf"/><stop offset=".58" stop-color="#fff8e6"/><stop offset="1" stop-color="#f1ead2"/></linearGradient><linearGradient id="lj-meadow" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#dce9c4"/><stop offset="1" stop-color="#a9bf92"/></linearGradient><radialGradient id="lj-sun-glow"><stop stop-color="#ffedaf" stop-opacity=".95"/><stop offset="1" stop-color="#fff5ce" stop-opacity="0"/></radialGradient></defs>'+
+      '<rect width="600" height="360" fill="url(#lj-sky)"/>'+
+      '<circle cx="472" cy="76" r="110" fill="url(#lj-sun-glow)"/><circle cx="475" cy="79" r="36" fill="#ffde82" opacity=".72"/>'+
+      '<path d="M0 188Q52 160 114 175T238 176T374 167T600 177V360H0Z" fill="#e6e9cc"/>'+
+      '<path d="M0 214Q80 182 150 213T320 207T485 203T600 210V360H0Z" fill="#d0dfb3"/>'+
+      '<path d="M0 265Q80 237 151 244T310 259T478 243T600 258V360H0Z" fill="url(#lj-meadow)"/>'+
+      '<path d="M0 325Q108 298 194 317T385 310T600 316V360H0Z" fill="#b8cea2" opacity=".78"/>'+
+      // The light curved garden walkway adds perspective without occupying flower locations.
+      '<path d="M295 360Q320 327 321 305Q327 275 315 253" fill="none" stroke="#f4e5c2" stroke-width="40" opacity=".6"/>'+
+      '<path d="M295 360Q320 327 321 305Q327 275 315 253" fill="none" stroke="#e8d4ad" stroke-width="1.5" stroke-dasharray="3 9" opacity=".8"/>'+
+      // Wispy background willow and orchard branches.
+      '<path d="M-5 4Q17 74 30 117M4 37Q34 68 71 78M6 62Q22 103 14 146" fill="none" stroke="#9db58a" stroke-width="5" stroke-linecap="round" opacity=".52"/>'+
+      '<path d="M603 0Q566 35 559 102M585 38Q546 44 528 86" fill="none" stroke="#9bb687" stroke-width="5" stroke-linecap="round" opacity=".45"/>'+
+      '<path d="M14 94Q5 77 18 70Q32 70 34 84Q29 98 14 94M52 74Q38 61 46 53Q63 51 67 64Q64 75 52 74M548 74Q530 61 535 48Q554 48 560 59Q561 72 548 74" fill="#b8cba0" opacity=".78"/>'+
+      // Low leafy clumps, tiny seed heads and stones are just garden scenery.
+      '<g fill="#a5be90" opacity=".85"><ellipse cx="45" cy="267" rx="34" ry="10"/><ellipse cx="546" cy="259" rx="43" ry="13"/><ellipse cx="114" cy="300" rx="31" ry="11"/><ellipse cx="473" cy="311" rx="36" ry="12"/></g>'+
+      '<g fill="#eff0d8" opacity=".87"><ellipse cx="356" cy="335" rx="17" ry="5"/><ellipse cx="271" cy="291" rx="10" ry="4"/><ellipse cx="405" cy="325" rx="11" ry="4"/></g>'+
+      '<g fill="#fdf5e0" opacity=".75"><circle cx="143" cy="226" r="2"/><circle cx="160" cy="224" r="1.6"/><circle cx="437" cy="232" r="1.8"/><circle cx="456" cy="220" r="1.6"/></g>'+
+      '<g>'+grasses+'</g>'+
+      '</svg>';
+  }
   function scene(entries,start){
     const pos=positions(entries),laughs=entries.filter(x=>x.type==='laugh').length,rows=Math.ceil(pos.length/6);
     const flowers=pos.map(({m,x,y,s})=>{const stage=growthStage(m,entries),sp=FLOWER_CLOCK[new Date(m.timestamp).getHours()];
       return '<button class="lj-flower lj-stage-'+stage+'" type="button" data-edit="'+escapeHtml(m.id)+'" style="left:'+x+'%;top:'+Math.max(20,y)+'%;--flower-size:'+s+'" title="'+escapeHtml(new Date(m.timestamp).toLocaleString()+' · '+sp.join(' — '))+'" aria-label="'+escapeHtml(sp[0]+'. Bloom stage '+stage+' of 3. Open memory')+'">'+flower(m)+'</button>';
     }).join('');
-    return '<div class="lj-garden-scene'+(laughs?' has-laughs':'')+'" style="min-height:'+Math.max(300,240+rows*65)+'px" role="group" aria-label="'+pos.length+' flowers, one per happy moment"><div class="lj-sky-sun">☀</div><div class="lj-hill lj-back"></div><div class="lj-hill lj-front"></div>'+(laughs?'<span class="lj-twinkle" aria-hidden="true">✧ ✦ ✧</span>':'')+flowers+(!pos.length?'<p class="lj-empty">A sunny little space for your first flower.<small>No rush to grow.</small></p>':'')+'<span class="lj-water-drops" aria-hidden="true">💧 ✧ 💧</span></div>';
+    return '<div class="lj-garden-scene'+(laughs?' has-laughs':'')+'" style="min-height:'+Math.max(300,240+rows*65)+'px" role="group" aria-label="'+pos.length+' flowers, one per happy moment"><div class="lj-landscape-wrap">'+gardenBackdrop()+'</div>'+(laughs?'<span class="lj-twinkle" aria-hidden="true">✧ ✦ ✧</span>':'')+flowers+(!pos.length?'<p class="lj-empty">A sunny little space for your first flower.<small>No rush to grow.</small></p>':'')+'<span class="lj-water-drops" aria-hidden="true">💧 ✧ 💧</span></div>';
   }
   function home(){
     const start=weekOf(new Date()),entries=items(start),joys=entries.filter(m=>m.type==='joy').length,laughs=entries.filter(m=>m.type==='laugh').length;
