@@ -823,59 +823,36 @@
     }).join('');
     return '<div class="lj-garden-scene'+(laughs?' has-laughs':'')+'" style="height:'+sceneHeight+'px;min-height:'+sceneHeight+'px" role="group" aria-label="'+pos.length+' flowers, one per happy moment"><div class="lj-landscape-wrap">'+gardenBackdrop(sceneHeight)+'</div>'+flowers+(!pos.length?'<p class="lj-empty">A sunny little space for your first flower.<small>No rush to grow.</small></p>':'')+'<span class="lj-water-drops" aria-hidden="true">✧ ✧ ✧</span></div>';
   }
-  let timelineZoom=1;
+  // The garden stays in one fixed frame. At the start of each new week,
+  // last week's flowers remain safely preserved in the weekly keepsake album.
   function timelineScene(){
-    const planted=moments.filter(m=>m.type==='joy').sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp));
+    const monday=weekOf(new Date()),sunday=new Date(monday);sunday.setDate(sunday.getDate()+7);
+    const planted=moments.filter(m=>m.type==='joy'&&new Date(m.timestamp)>=monday&&new Date(m.timestamp)<sunday)
+      .sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp));
     const rows=Math.max(1,Math.ceil(planted.length/7));
-    const width=790,height=Math.max(400,285+rows*93);
-    const pos=planted.map((m,i)=>{
+    const flowers=planted.map((m,i)=>{
       const row=Math.floor(i/7),col=i%7;
-      const offset=(row%2?25:0);
-      const x=70+col*103+offset+(rnd(m.id,'x')-.5)*24;
-      const y=218+row*91+(col%2?15:-8)+(rnd(m.id,'y')-.5)*17;
-      return {m,x,y,row,s:.80+rnd(m.id,'scale')*.20};
-    });
-    const flow=pos.map(({m,x,y,row,s})=>{
+      const x=(col+.5)*100/7+(rnd(m.id,'x')-.5)*2.3;
+      const y=32+(row+.6)*(58/rows)+(col%2?1.5:-1.5);
       const h=new Date(m.timestamp).getHours(),stage=growthStage(m,moments),sp=FLOWER_CLOCK[h];
-      return '<button type="button" class="lj-flower lj-stage-'+stage+'" data-edit="'+escapeHtml(m.id)+'" style="left:'+x+'px;top:'+y+'px;--flower-size:'+s+';--flower-rotate:'+((rnd(m.id,'twist')-.5)*13)+'deg;z-index:'+(10+row)+'" title="'+escapeHtml(sp[0]+' · '+new Date(m.timestamp).toLocaleDateString())+'" aria-label="'+escapeHtml('Open '+sp[0]+' memory, '+new Date(m.timestamp).toLocaleString())+'">'+flower(m)+'</button>';
+      const size=Math.min(.93,Math.max(.49,1.02-rows*.085));
+      return '<button type="button" class="lj-flower lj-stage-'+stage+'" data-edit="'+escapeHtml(m.id)+'" style="left:'+x+'%;top:'+y+'%;--flower-size:'+size+';--flower-rotate:'+((rnd(m.id,'twist')-.5)*10)+'deg;z-index:'+(10+row)+'" title="'+escapeHtml(sp[0]+' · '+new Date(m.timestamp).toLocaleDateString())+'" aria-label="'+escapeHtml('Open '+sp[0]+' memory, '+new Date(m.timestamp).toLocaleString())+'">'+flower(m)+'</button>';
     }).join('');
-    // Milestones are labels, never decorative flowers or journal records.
-    let milestones='',previous='';
-    pos.forEach(({m,y},i)=>{
-      const d=new Date(m.timestamp),month=d.toLocaleDateString(undefined,{month:'long',year:'numeric'});
-      if(month!==previous){milestones+='<div class="lj-timeline-date" style="top:'+Math.max(80,y-79)+'px">'+escapeHtml(month)+'</div>';previous=month;}
-    });
-    return '<div class="lj-timeline-shell"><div class="lj-timeline-toolbar"><span>Explore your forever garden</span><div><button type="button" data-timeline-zoom="out" aria-label="Zoom out">−</button><button type="button" data-timeline-zoom="in" aria-label="Zoom in">+</button><button type="button" data-timeline-latest>Newest</button></div></div>'+
-      '<div class="lj-timeline-viewport" id="lj-timeline-viewport" aria-label="Scrollable garden map. Move horizontally and vertically to explore your flowers." tabindex="0">'+
-      '<div class="lj-timeline-spacer" style="width:'+(width*timelineZoom)+'px;height:'+(height*timelineZoom)+'px">'+
-      '<div class="lj-timeline-world" style="width:'+width+'px;height:'+height+'px;transform:scale('+timelineZoom+')">'+
-      '<div class="lj-landscape-wrap">'+gardenBackdrop(height)+'</div>'+milestones+flow+
-      (!planted.length?'<div class="lj-timeline-empty">Your first little joy will plant your first flower here.</div>':'')+
-      '</div></div></div><p class="lj-timeline-help">Drag or swipe to explore your garden. Zoom in to find your flowers, then tap one to revisit its memory.</p></div>';
+    return '<div class="lj-timeline-shell lj-fixed-garden">'+
+      '<div class="lj-timeline-toolbar"><span>This week’s little garden</span><span class="lj-week-label">Bumble gathers the blooms at week’s end</span></div>'+
+      '<div class="lj-timeline-viewport" id="lj-timeline-viewport" aria-label="Fixed garden with '+planted.length+' flowers planted this week">'+
+      '<div class="lj-timeline-world"><div class="lj-landscape-wrap">'+gardenBackdrop(410)+'</div>'+flowers+
+      (!planted.length?'<div class="lj-timeline-empty">A sunny little space for this week’s first flower.</div>':'')+
+      '</div></div><p class="lj-timeline-help">Your flowers stay right here all week. Bumble gathers them into your weekly keepsake, so every little joy is remembered.</p></div>';
   }
-  function focusTimeline(latest=true){
-    const el=content.querySelector('#lj-timeline-viewport');
-    if(!el)return;
-    if(latest){el.scrollTop=el.scrollHeight;el.scrollLeft=Math.max(0,(el.scrollWidth-el.clientWidth)/2);}
-  }
-  function zoomTimeline(direction){
-    const view=content.querySelector('#lj-timeline-viewport'),spacer=view?.querySelector('.lj-timeline-spacer'),world=view?.querySelector('.lj-timeline-world');
-    if(!view||!spacer||!world)return;
-    const before=timelineZoom;
-    timelineZoom=Math.max(.7,Math.min(1.65,Math.round((timelineZoom+(direction==='in'?.15:-.15))*100)/100));
-    const centerX=(view.scrollLeft+view.clientWidth/2)/before,centerY=(view.scrollTop+view.clientHeight/2)/before;
-    spacer.style.width=(790*timelineZoom)+'px';
-    spacer.style.height=(Number(world.style.height.replace('px',''))*timelineZoom)+'px';
-    world.style.transform='scale('+timelineZoom+')';
-    view.scrollLeft=Math.max(0,centerX*timelineZoom-view.clientWidth/2);
-    view.scrollTop=Math.max(0,centerY*timelineZoom-view.clientHeight/2);
-  }
+  function focusTimeline(){ /* The garden is a fixed frame; nothing to pan. */ }
+  function zoomTimeline(){ /* No zoom: flowers stay planted in their places. */ }
   function home(){
-    const planted=moments.filter(m=>m.type==='joy').length,laughs=moments.filter(m=>m.type==='laugh').length;
-    return '<section class="lj-garden"><div class="lj-garden-head"><div><span class="eyebrow">YOUR FOREVER GARDEN</span><h2>A pocketful of sunshine.</h2><p>Every flower you have ever planted lives here.</p></div><div class="lj-count"><strong>'+planted+'</strong> '+(planted===1?'flower':'flowers')+'<small>'+laughs+' little laughs</small></div></div>'+
+    const weekStart=weekOf(new Date()),planted=items(weekStart).filter(m=>m.type==='joy').length,laughs=items(weekStart).filter(m=>m.type==='laugh').length;
+    return '<section class="lj-garden"><div class="lj-garden-head"><div><span class="eyebrow">THIS WEEK’S GARDEN</span><h2>A pocketful of sunshine.</h2><p>Your happy moments bloom here until Bumble gathers them for your weekly keepsake.</p></div><div class="lj-count"><strong>'+planted+'</strong> '+(planted===1?'flower':'flowers')+'<small>'+laughs+' little laughs</small></div></div>'+
       timelineScene()+
       '<div class="lj-garden-actions"><button type="button" class="lj-garden-camera" data-garden-photo="daily">'+icon('camera',18)+' Bumble, snap today’s garden!</button><button type="button" class="lj-garden-camera secondary" data-garden-photo="weekly">Weekly keepsake</button></div>'+
-      '<p class="lj-tip">Your garden never resets. Happy moments plant flowers; laughs help them grow. Weekly photos are keepsakes of this same garden.</p></section>'+
+      '<p class="lj-tip">A fresh garden begins each Monday. Bumble keeps every previous week’s flowers safe in your garden album. Happy moments plant flowers; laughs help them grow.</p></section>'+
       '<button type="button" class="lj-bumble-chat-link" data-goto="together">'+bee()+'<span><strong>Want to talk to Bumble?</strong><small>Ask about flowers, jokes, weather and garden status.</small></span><span aria-hidden="true">›</span></button>';
   }
   function flowerBook(){
