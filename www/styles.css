@@ -687,3 +687,15 @@ body{background:radial-gradient(circle at 13% 15%,#fff0b4 0,transparent 32%),rad
   .lj-garden-scene,
   .lj-week-card .lj-garden-scene{min-height:0!important;height:auto}
 }
+
+/* Organic flower-bed composition: gentle overlaps and natural depth. */
+.lj-garden-scene .lj-flower{
+  width:64px;
+  height:84px;
+  filter:drop-shadow(0 3px 2px rgba(77,106,60,.11));
+}
+.lj-garden-scene .lj-flower svg{overflow:visible}
+.lj-garden-scene .lj-flower:focus-visible{outline:2px solid #b58c4b;outline-offset:2px}
+@media(prefers-reduced-motion:no-preference){
+ .lj-garden-scene .lj-flower:not(.lj-growing){transition:transform .35s ease,filter .35s ease}
+}
