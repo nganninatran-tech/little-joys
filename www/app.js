@@ -576,7 +576,7 @@
     return `<article class="moment-card">
       <div class="moment-dot ${m.type==='joy'?'joy':''}">${icon(m.type==='laugh'?'laugh':'heart',19)}</div>
       <div class="moment-body"><div class="moment-meta"><time datetime="${escapeHtml(m.timestamp)}">${escapeHtml(timeText(d))}</time>${m.sample?'<span>· demo</span>':''}</div><div class="moment-kind">${momentName(m)}</div>${m.note?`<p class="moment-note">${escapeHtml(m.note)}</p>`:''}${m.photo?`<img class="moment-photo" data-photo-id="${escapeHtml(m.id)}" alt="Photo saved with this moment" loading="lazy">`:''}</div>
-      <div class="moment-actions-inline"><button class="small-icon-button" type="button" data-edit="${escapeHtml(m.id)}" aria-label="${m.note?'Edit note':'Add a note'} for ${momentName(m)}" title="${m.note?'Edit note':'Add a note'}">${icon('edit',16)}</button><button class="small-icon-button" type="button" data-delete="${escapeHtml(m.id)}" aria-label="Delete ${momentName(m)}" title="Delete">${icon('trash',16)}</button></div>
+      <div class="moment-actions-inline"><button class="small-icon-button" type="button" data-share="${escapeHtml(m.id)}" aria-label="Share ${momentName(m)} with a friend" title="Share this memory">${icon('share',16)}</button><button class="small-icon-button" type="button" data-edit="${escapeHtml(m.id)}" aria-label="${m.note?'Edit note':'Add a note'} for ${momentName(m)}" title="${m.note?'Edit note':'Add a note'}">${icon('edit',16)}</button><button class="small-icon-button" type="button" data-delete="${escapeHtml(m.id)}" aria-label="Delete ${momentName(m)}" title="Delete">${icon('trash',16)}</button></div>
     </article>`;
   }
   const garden = (function gardenBuilder(){
@@ -897,7 +897,7 @@
   function renderJournal() {
     return `<span class="eyebrow">YOUR POCKET-SIZED TIME CAPSULE</span><h1 class="page-title">The moments you kept.</h1><p class="page-description">Some days are full. Some are quiet. Every saved moment belongs here.</p>
       <div class="pill-filters" aria-label="Filter your moments"><button class="filter-btn ${journalFilter==='all'?'selected':''}" data-filter="all" aria-pressed="${journalFilter==='all'}">All (${moments.length})</button><button class="filter-btn ${journalFilter==='laugh'?'selected':''}" data-filter="laugh" aria-pressed="${journalFilter==='laugh'}">Little laughs</button><button class="filter-btn ${journalFilter==='joy'?'selected':''}" data-filter="joy" aria-pressed="${journalFilter==='joy'}">Happy moments</button></div>
-      <button type="button" class="lj-share-link" data-goto="together">Share a little moment with someone →</button>
+      <p class="lj-memories-hint">Your memories stay private until you tap the share icon on a moment.</p>
       <label class="search-field">${icon('search',16)}<span class="sr-only">Search memories</span><input id="journal-search" placeholder="Search your little memories" value="${escapeHtml(journalQuery)}" maxlength="100"></label>
       <div id="journal-list">${journalListHtml()}</div>`;
   }
