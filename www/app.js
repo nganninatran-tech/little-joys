@@ -748,22 +748,14 @@
   function bee(){return '<svg viewBox="0 0 160 130" role="img" aria-label="Bumble the bee"><g stroke="#171512" stroke-linecap="round" stroke-linejoin="round"><path d="M64 35 C65 15 85 7 101 19 C113 28 105 46 90 50Z" fill="#d6f0ff" stroke-width="3.5"/><path d="M88 40 C93 13 125 11 136 34 C143 56 117 66 98 51Z" fill="#e0f3ff" stroke-width="3.5"/><path d="M68 18Q80 30 89 21M66 31Q82 40 100 35M85 17Q85 33 102 47M102 18Q104 40 127 41M119 20Q116 35 139 35M101 50Q113 40 125 61" fill="none" stroke-width="2.2"/><path d="M63 51 C81 41 128 45 140 70 C155 104 124 120 91 113 L66 101Z" fill="#302c25" stroke-width="4"/><path d="M86 47Q99 46 107 54Q122 82 110 114L87 113Q94 78 79 49Z" fill="#ffdc59" stroke="none"/><path d="M129 58Q143 71 143 91Q141 102 137 106L128 103Q136 83 121 53Z" fill="#ffdb59" stroke="none"/><path d="M65 48 C37 38 14 50 10 72 C2 103 31 118 57 111 C79 105 93 91 87 67 C84 56 77 50 65 48Z" fill="#ffdb57" stroke-width="4"/><path d="M37 49Q31 32 23 27M61 47Q62 30 54 25" fill="none" stroke-width="4"/><circle cx="23" cy="25" r="6" fill="#ff9c42" stroke="none"/><circle cx="54" cy="23" r="6" fill="#ff9c42" stroke="none"/><circle cx="27" cy="76" r="2.8" fill="#151410" stroke="none"/><circle cx="60" cy="76" r="2.8" fill="#151410" stroke="none"/><path d="M39 78Q44 91 50 79" fill="none" stroke-width="4.5"/><circle cx="22" cy="85" r="5" fill="#f88e70" stroke="none"/><circle cx="67" cy="86" r="5" fill="#f88e70" stroke="none"/></g></svg>';}
   function positions(entries){
     const joys=entries.filter(m=>m.type==='joy').sort((a,b)=>String(a.timestamp).localeCompare(String(b.timestamp)));
-    // Five loosely planted flowers per meadow band; neighbors can overlap slightly,
-    // like a real flower bed, without stacking many heads in exactly one spot.
-    const patterns=[
-      [10,30,49,72,90],
-      [15,36,57,76,88],
-      [10,28,51,70,91],
-      [14,39,59,80,90]
-    ];
+    // Compact painterly flower bed; stems and leaves overlap softly, never a long grid.
+    const bands=[[10,25,39,55,70,86],[17,31,46,61,77,91],[9,24,40,56,72,87],[16,31,47,62,77,91]];
     return joys.map((m,i)=>{
-      const row=Math.floor(i/5),col=i%5,pattern=patterns[row%patterns.length];
-      const jitterX=(rnd(m.id,'x')-.5)*6;
-      const jitterY=(rnd(m.id,'y')-.5)*16;
-      const x=Math.max(9,Math.min(92,pattern[col]+jitterX));
-      const y=152+row*96+jitterY+(col%2?12:-7);
-      const scale=.75+rnd(m.id,'scale')*.21;
-      return {m,x,y,s:scale,row};
+      const row=Math.floor(i/6),col=i%6;
+      const x=bands[row%bands.length][col]+(rnd(m.id,'x')-.5)*4;
+      const y=128+row*58+(col%2?13:-8)+(rnd(m.id,'y')-.5)*12;
+      const s=.60+rnd(m.id,'size')*.13;
+      return {m,x,y,s,row};
     });
   }
   function growthStage(m,entries){const t=new Date(m.timestamp).getTime();return Math.min(3,entries.filter(x=>x.type==='laugh'&&new Date(x.timestamp).getTime()>t).length);}
@@ -815,14 +807,13 @@
   }
   function scene(entries,start){
     const pos=positions(entries),laughs=entries.filter(x=>x.type==='laugh').length;
-    const rows=Math.max(1,Math.ceil(pos.length/5));
-    const sceneHeight=Math.max(335,155+rows*96);
+    const rows=Math.max(1,Math.ceil(pos.length/6)),sceneHeight=Math.max(345,160+rows*58);
     const flowers=pos.map(({m,x,y,s,row})=>{
       const stage=growthStage(m,entries),sp=FLOWER_CLOCK[new Date(m.timestamp).getHours()];
-      const twist=(rnd(m.id,'twist')-.5)*14;
+      const twist=(rnd(m.id,'twist')-.5)*12;
       return '<button class="lj-flower lj-stage-'+stage+'" type="button" data-edit="'+escapeHtml(m.id)+'" style="left:'+x+'%;top:'+y+'px;--flower-size:'+s+';--flower-rotate:'+twist+'deg;z-index:'+(10+row)+'" title="'+escapeHtml(new Date(m.timestamp).toLocaleString()+' · '+sp.join(' — '))+'" aria-label="'+escapeHtml(sp[0]+'. Bloom stage '+stage+' of 3. Open memory')+'">'+flower(m)+'</button>';
     }).join('');
-    return '<div class="lj-garden-scene'+(laughs?' has-laughs':'')+'" style="height:'+sceneHeight+'px;min-height:'+sceneHeight+'px" role="group" aria-label="'+pos.length+' flowers, one per happy moment"><div class="lj-landscape-wrap">'+gardenBackdrop(sceneHeight)+'</div>'+flowers+(!pos.length?'<p class="lj-empty">A sunny little space for your first flower.<small>No rush to grow.</small></p>':'')+'<span class="lj-water-drops" aria-hidden="true">💧 ✧ 💧</span></div>';
+    return '<div class="lj-garden-scene'+(laughs?' has-laughs':'')+'" style="height:'+sceneHeight+'px;min-height:'+sceneHeight+'px" role="group" aria-label="'+pos.length+' flowers, one per happy moment"><div class="lj-landscape-wrap">'+gardenBackdrop(sceneHeight)+'</div>'+flowers+(!pos.length?'<p class="lj-empty">A sunny little space for your first flower.<small>No rush to grow.</small></p>':'')+'<span class="lj-water-drops" aria-hidden="true">✧ ✧ ✧</span></div>';
   }
   function home(){
     const start=weekOf(new Date()),entries=items(start),joys=entries.filter(m=>m.type==='joy').length,laughs=entries.filter(m=>m.type==='laugh').length;
