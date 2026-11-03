@@ -761,7 +761,7 @@
   function growthStage(m,entries){const t=new Date(m.timestamp).getTime();return Math.min(3,entries.filter(x=>x.type==='laugh'&&new Date(x.timestamp).getTime()>t).length);}
   function celebrateLaugh(){
     if(currentTab!=='today')return;
-    const el=content.querySelector('.lj-garden-scene');if(!el)return;
+    const el=content.querySelector('.lj-timeline-world');if(!el)return;
     el.classList.remove('lj-watering');void el.offsetWidth;el.classList.add('lj-watering');
     for(const f of el.querySelectorAll('.lj-flower')){
       const stage=Number((f.className.match(/lj-stage-(\d)/)||[])[1]||0);
@@ -991,11 +991,16 @@
       ensure();
       if(!enabled){onGrow?.();return;}
       if(busy){onGrow?.();return;}
-      const gardenScene=document.querySelector('.lj-garden-scene');
+      const gardenScene=document.querySelector('.lj-timeline-world')||document.querySelector('.lj-garden-scene');
       const flowers=[...(gardenScene?.querySelectorAll('.lj-flower')||[])];
-      const visible=flowers.filter(f=>{const r=f.getBoundingClientRect();return r.bottom>145&&r.top<bounds().h-155;});
-      const target=(visible.find(f=>!f.classList.contains('lj-stage-3'))||visible[0]||flowers[0]);
-      if(!target){onGrow?.();say('First plant a flower, then I can water it!');return;}
+      const viewport=document.querySelector('#lj-timeline-viewport');
+      const visible=flowers.filter(f=>{
+        const r=f.getBoundingClientRect();
+        const v=viewport?.getBoundingClientRect();
+        return r.bottom>Math.max(145,v?.top||145)&&r.top<Math.min(bounds().h-145,v?.bottom||bounds().h-145)&&r.right>0&&r.left<bounds().w;
+      });
+      const target=(visible.find(f=>!f.classList.contains('lj-stage-3'))||visible[0]);
+      if(!target){onGrow?.();say('Your flower is growing! Swipe to the blooms to see it.');return;}
       busy=true;
       const rect=target.getBoundingClientRect();
       const {w,h}=bounds();
