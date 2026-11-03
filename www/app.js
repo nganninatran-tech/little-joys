@@ -797,7 +797,7 @@
       '<path d="M-12 248Q-18 209 12 208Q22 178 48 196Q64 162 89 194Q112 181 129 221L135 263Z"/>'+
       '<path d="M462 262Q462 217 490 216Q497 180 526 199Q551 164 577 190Q609 183 615 227V267Z"/>'+
       '</g>'+
-      '<path class="lj-grass-hill" d="M0 232Q145 160 300 190Q460 162 600 230V'+h+'H0Z" fill="#91c965" stroke="#4c9652" stroke-width="4"/>'+
+      '<path class="lj-grass-hill" d="M0 232Q300 114 600 232V'+h+'H0Z" fill="#91c965" stroke="#4c9652" stroke-width="4"/>'+
       '<g class="lj-garden-tufts" fill="none" stroke="#387e46" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">'+
       '<path d="M75 305q-8 -14 -15 -8m15 8q0 -22 9 -21m-9 21q14 -12 20 -5"/>'+
       '<path d="M255 356q-8 -15 -14 -7m14 7q0 -22 9 -20m-9 20q12 -13 18 -6"/>'+
