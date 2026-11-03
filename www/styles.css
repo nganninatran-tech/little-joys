@@ -761,7 +761,8 @@ body{background:radial-gradient(circle at 13% 15%,#fff0b4 0,transparent 32%),rad
 .lj-fixed-garden.lj-time-sunrise .lj-timeline-world{background:linear-gradient(#ffd2ac 0%,#ffe7b4 44%,#c0d69a 100%)}
 .lj-fixed-garden.lj-time-sunset .lj-timeline-world{background:linear-gradient(#f1b7b1 0%,#f9c594 46%,#b2bd89 100%)}
 .lj-fixed-garden.lj-time-night .lj-timeline-world{background:linear-gradient(#182344,#37436c 48%,#344e53 100%)}
-.lj-fixed-garden.lj-time-night .lj-landscape{opacity:.42;filter:brightness(.48) saturate(.8)}
+.lj-fixed-garden.lj-time-night .lj-landscape{opacity:.12;filter:brightness(.35) saturate(.75)}
+.lj-fixed-garden.lj-time-night .lj-timeline-world:before{content:"";position:absolute;inset:40% 0 0;z-index:0;background:linear-gradient(transparent,#2e514a 68%,#244536);pointer-events:none}
 .lj-fixed-garden.lj-time-night .lj-sky-orb{background:#f5efcf;box-shadow:0 0 25px 7px #faf5cd4d;width:48px;height:48px}
 .lj-fixed-garden.lj-time-night .lj-sky-stars{display:block}
 .lj-fixed-garden.lj-time-night .lj-sky-cloud{opacity:.15}
