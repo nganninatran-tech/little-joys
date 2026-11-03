@@ -548,3 +548,8 @@ body{background:radial-gradient(circle at 13% 15%,#fff0b4 0,transparent 32%),rad
 @keyframes lj-bee-dip{0%,100%{transform:translateY(0)}50%{transform:translate(-18px,14px)}}
 @keyframes lj-bloom-pulse{0%,100%{filter:drop-shadow(0 0 0 transparent)}50%{filter:drop-shadow(0 0 13px #f6d77b)}}
 @media(prefers-reduced-motion:reduce){.lj-watering .lj-water-drops,.lj-watering .lj-bee-fly,.lj-growing{animation:none!important}.lj-flower .lj-bloom-head,.lj-flower .lj-bud-mark{transition:none!important}}
+
+/* Flower Clock shows full botanical specimens; garden uses live growth stages. */
+.lj-book-illustration .lj-bud-mark{opacity:0}
+.lj-book-illustration .lj-bloom-head{transform:scale(1);opacity:1}
+@media(max-width:420px){.lj-garden-scene{height:285px;min-height:285px}.lj-garden-head{align-items:flex-start}.lj-garden-head h2{font-size:22px}}
