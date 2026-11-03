@@ -864,12 +864,18 @@
       <div class="insight-grid"><div class="insight-card"><strong>${laughs+joys}</strong><span>little moments saved<br>this week</span></div><div class="insight-card"><strong>${days}<span style="font-family:inherit;font-size:16px"> / 7</span></strong><span>days with at least<br>one saved moment</span></div></div>
       <div class="reflection-card"><strong>A note to yourself</strong><p>${days===0?'This week is still yours, even without a single entry. There is nothing to catch up on.':'A day with fewer saved moments is not a less happy day. This is a record of what you noticed, not a measure of how much joy you deserve.'}</p></div></details>`;
   }
+  let togetherSelectedId=null;
+  function togetherPreview(){
+    const chosen=moments.find(m=>m.id===togetherSelectedId)||moments[0];
+    if(!chosen)return '<p class="lj-together-empty">When you have a little moment to share, it will be here. Nothing sends automatically.</p>';
+    const date=new Date(chosen.timestamp);
+    return '<article class="lj-together-preview"><span class="eyebrow">A LITTLE JOY, JUST FOR YOU</span><div class="lj-together-sun">☀</div><h2>'+escapeHtml(chosen.type==='laugh'?'A little laugh worth sharing':'A little sunshine from my day')+'</h2><p>'+escapeHtml(chosen.note || (chosen.type==='laugh'?'Something made me laugh today.':'Something made me smile today.'))+'</p><small>'+escapeHtml(date.toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'}))+'</small>'+(chosen.photo?'<div class="lj-together-photo"><img data-photo-id="'+escapeHtml(chosen.id)+'" alt="Photo to include with shared moment" loading="lazy"></div>':'')+'<div class="lj-together-preview-actions"><button type="button" class="primary-button" data-share="'+escapeHtml(chosen.id)+'">'+icon('share',18)+' Share with a friend</button></div></article>';
+  }
   function renderTogether() {
-    const shared=moments.slice(0,20);
-    return `<span class="eyebrow">GOOD THINGS CAN BE SHARED</span><h1 class="page-title">A little joy, for someone.</h1><div class="people-header"><span class="eyebrow">THINKING OF YOU</span><h2>Send a little<br>piece of your day.</h2><p>Choose a memory and send it to a friend using your phone's share menu. Nothing is shared unless you choose to send it.</p></div>
-      <div class="section-heading"><h2>Choose a moment to share</h2><button class="text-link" type="button" data-goto="journal">See all memories →</button></div>
-      ${shared.length?shared.map(m=>`<article class="share-card"><div class="share-card-header"><div class="moment-dot ${m.type==='joy'?'joy':''}">${icon(m.type==='laugh'?'laugh':'heart',15)}</div><div><div class="moment-kind">${momentName(m)}</div><div class="moment-meta">${escapeHtml(dateGroupText(new Date(m.timestamp)))}</div></div></div><p>${m.note?escapeHtml(m.note):m.type==='laugh'?'Something made me laugh today.':'Something made me happy today.'}</p>${m.photo?`<img class="share-photo" data-photo-id="${escapeHtml(m.id)}" alt="Photo saved with this moment" loading="lazy">`:''}<div class="share-card-actions"><button type="button" class="outline-button" data-share="${escapeHtml(m.id)}">${icon('share',14)} Share this moment</button></div></article>`).join(''):emptyState('Sharing starts with a moment','Save a little laugh or happy moment on Today, then you can share it here.','hearts')}
-      <p class="info-note">Your journal stays private. Only the message you deliberately share leaves the app. This version uses your phone's share menu or copies a message; it does not connect accounts or send automatic alerts.</p>`;
+    if(!togetherSelectedId||!moments.some(m=>m.id===togetherSelectedId))togetherSelectedId=moments[0]?.id||null;
+    return '<section class="lj-together-studio"><span class="eyebrow">TOGETHER</span><h1 class="page-title">Pass a little sunshine.</h1><p class="page-description">Choose one meaningful memory, then send it to someone you care about. A little joy can brighten two days.</p>'+
+      (moments.length?'<label class="lj-together-select-label" for="lj-together-select">Choose a memory to send</label><select id="lj-together-select" class="lj-together-select">'+moments.slice(0,100).map(m=>'<option value="'+escapeHtml(m.id)+'" '+(m.id===togetherSelectedId?'selected':'')+'>'+escapeHtml(new Date(m.timestamp).toLocaleDateString(undefined,{month:'short',day:'numeric'})+' · '+(m.note?m.note.slice(0,48):momentName(m)))+'</option>').join('')+'</select><div id="lj-together-preview">'+togetherPreview()+'</div>':emptyState('A joy to share starts in your garden','Plant a happy moment or save a laugh first. Then come back to send it to a friend.','heart'))+
+      '<p class="lj-together-private">'+icon('shield',17)+' Only what you choose is shared. Your whole journal stays private.</p></section>';
   }
   function renderYou() {
     return `<span class="eyebrow">MADE TO BE YOURS</span><h1 class="page-title">Your space, your pace.</h1><p class="page-description">Your little moments are yours to keep. This version saves everything on this device, without an account.</p>
@@ -1023,6 +1029,13 @@
     else if(target.dataset.share)shareMoment(target.dataset.share);
     else if(target.dataset.filter){journalFilter=target.dataset.filter;render();}
     else if(target.dataset.tool)handleTool(target.dataset.tool);
+  });
+  content.addEventListener('change',e=>{
+    if(e.target.id==='lj-together-select'){
+      togetherSelectedId=e.target.value;
+      const preview=content.querySelector('#lj-together-preview');
+      if(preview){preview.innerHTML=togetherPreview();hydratePhotos(preview);}
+    }
   });
   content.addEventListener('input',e=>{
     if(e.target.id==='journal-search'){
