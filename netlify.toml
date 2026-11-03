@@ -1,0 +1,7 @@
+# Publish the Little Joys web app from the www folder.
+# The repository root also contains native iOS/Android build files.
+[build]
+  publish = "www"
+
+[build.environment]
+  NODE_VERSION = "22"
