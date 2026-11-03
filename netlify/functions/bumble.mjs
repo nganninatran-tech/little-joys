@@ -42,3 +42,6 @@ export default async function handler(request){
     return reply(text?.trim().slice(0,1700)||'I could not find a clear answer. Try asking about a specific flower.');
   }catch{return reply('My garden connection is having trouble. Please try again soon.',502);}
 }
+
+// Netlify enforces this across instances; the in-memory check above is an extra safeguard.
+export const config={path:'/api/bumble',rateLimit:{windowLimit:12,windowSize:60,aggregateBy:['ip','domain']}};
