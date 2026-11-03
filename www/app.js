@@ -864,19 +864,105 @@
       <div class="insight-grid"><div class="insight-card"><strong>${laughs+joys}</strong><span>little moments saved<br>this week</span></div><div class="insight-card"><strong>${days}<span style="font-family:inherit;font-size:16px"> / 7</span></strong><span>days with at least<br>one saved moment</span></div></div>
       <div class="reflection-card"><strong>A note to yourself</strong><p>${days===0?'This week is still yours, even without a single entry. There is nothing to catch up on.':'A day with fewer saved moments is not a less happy day. This is a record of what you noticed, not a measure of how much joy you deserve.'}</p></div></details>`;
   }
-  let togetherSelectedId=null;
-  function togetherPreview(){
-    const chosen=moments.find(m=>m.id===togetherSelectedId)||moments[0];
-    if(!chosen)return '<p class="lj-together-empty">When you have a little moment to share, it will be here. Nothing sends automatically.</p>';
-    const date=new Date(chosen.timestamp);
-    return '<article class="lj-together-preview"><span class="eyebrow">A LITTLE JOY, JUST FOR YOU</span><div class="lj-together-sun">☀</div><h2>'+escapeHtml(chosen.type==='laugh'?'A little laugh worth sharing':'A little sunshine from my day')+'</h2><p>'+escapeHtml(chosen.note || (chosen.type==='laugh'?'Something made me laugh today.':'Something made me smile today.'))+'</p><small>'+escapeHtml(date.toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'}))+'</small>'+(chosen.photo?'<div class="lj-together-photo"><img data-photo-id="'+escapeHtml(chosen.id)+'" alt="Photo to include with shared moment" loading="lazy"></div>':'')+'<div class="lj-together-preview-actions"><button type="button" class="primary-button" data-share="'+escapeHtml(chosen.id)+'">'+icon('share',18)+' Share with a friend</button></div></article>';
-  }
-  function renderTogether() {
-    if(!togetherSelectedId||!moments.some(m=>m.id===togetherSelectedId))togetherSelectedId=moments[0]?.id||null;
-    return '<section class="lj-together-studio"><span class="eyebrow">TOGETHER</span><h1 class="page-title">Pass a little sunshine.</h1><p class="page-description">Choose one meaningful memory, then send it to someone you care about. A little joy can brighten two days.</p>'+
-      (moments.length?'<label class="lj-together-select-label" for="lj-together-select">Choose a memory to send</label><select id="lj-together-select" class="lj-together-select">'+moments.slice(0,100).map(m=>'<option value="'+escapeHtml(m.id)+'" '+(m.id===togetherSelectedId?'selected':'')+'>'+escapeHtml(new Date(m.timestamp).toLocaleDateString(undefined,{month:'short',day:'numeric'})+' · '+(m.note?m.note.slice(0,48):momentName(m)))+'</option>').join('')+'</select><div id="lj-together-preview">'+togetherPreview()+'</div>':emptyState('A joy to share starts in your garden','Plant a happy moment or save a laugh first. Then come back to send it to a friend.','heart'))+
-      '<p class="lj-together-private">'+icon('shield',17)+' Only what you choose is shared. Your whole journal stays private.</p></section>';
-  }
+  // Bumble's private on-device chat: curated flowers and jokes, optional live weather.
+  // This is a lightweight rule-based companion, not a generative AI service.
+  const bumbleChat=(function(){
+    const KEY='little-joys.bumble.chat.v1';
+    const flowerFacts=[
+      ['Snowdrop','hope and new beginnings','Snowdrops are among the earliest spring flowers and often push through cold ground.'],
+      ['Violet','faithfulness and modesty','Violets have heart-shaped leaves and small flowers, often purple.'],
+      ['Forget-me-not','remembrance and lasting connection','Their tiny blue flowers have bright yellow centers.'],
+      ['Bluebell','kindness and humility','Bluebells form nodding bells on slender stems; many bloom in woodland.'],
+      ['Lily of the valley','the return of happiness','These fragrant flowers hang like little white bells; they are poisonous if eaten.'],
+      ['Crocus','cheerfulness and renewal','Crocuses are low-growing flowers that often signal spring.'],
+      ['Daffodil','new beginnings','Daffodils have a distinctive central trumpet; their bulbs are toxic if eaten.'],
+      ['Daisy','innocence and simplicity','Many daisies have white ray florets surrounding a yellow disk.'],
+      ['Freesia','friendship and trust','Freesia grows fragrant, funnel-shaped flowers along arching stems.'],
+      ['Tulip','love and affection','Tulips are spring bulbs with a recognizable cup-shaped blossom.'],
+      ['Garden pink','love and admiration','Dianthus flowers often have fringed petals and a spicy scent.'],
+      ['Pansy','thoughtfulness','Pansies have broad overlapping petals, often with a dark face-like blotch.'],
+      ['Sunflower','adoration and loyalty','Young sunflowers often track the sun; their central head contains many tiny florets.'],
+      ['Goldenrod','encouragement and good fortune','Goldenrod grows golden sprays of small composite flower heads.'],
+      ['Coreopsis','cheerfulness','Coreopsis has sunny daisy-like blooms, often bright yellow.'],
+      ['Peony','good fortune and affection','Peonies are beloved for their lush, layered petals.'],
+      ['Orchid','beauty and elegance','Orchids are a vast family of flowers, often with a specialized central lip.'],
+      ['Gladiolus','strength and integrity','Gladiolus grows tall spikes with blossoms opening along the stem.'],
+      ['Pink rose','gratitude and admiration','Pink roses often represent appreciation, though meanings vary with tradition.'],
+      ['Lavender','calm and devotion','Lavender grows aromatic spikes of purple blossoms; the scent is widely used in gardens.'],
+      ['Iris','hope and wisdom','Irises commonly have three upright petals and three downward-curving falls.'],
+      ['Sweet pea','delicate pleasures and gratitude','Sweet peas are climbing flowers with fluttering, butterfly-like blooms.'],
+      ['Hyacinth','steadfastness','Hyacinths grow dense spikes of fragrant starry flowers.'],
+      ['Aster','patience and affection','Asters have many slender ray petals surrounding a central disk.']
+    ];
+    const jokes=[
+      'Why did the bee have sticky hair? It used a honeycomb!',
+      'What do you call a flower that runs on electricity? A power plant!',
+      'Why did the gardener quit? His celery was too low!',
+      'What did the flower say after telling a joke? I was only pollen your leg!',
+      'How do flowers ride bicycles? They pedal!',
+      'Why did the sunflower get promoted? It was outstanding in its field!',
+      'What did one flower say to another? What’s up, buttercup?',
+      'Why do bees have such neat hair? Honeycombs!'
+    ];
+    let messages;
+    try{const raw=JSON.parse(localStorage.getItem(KEY)||'[]');messages=Array.isArray(raw)?raw.filter(x=>x&&['you','bumble'].includes(x.who)&&typeof x.text==='string').slice(-30).map(x=>({who:x.who,text:x.text.slice(0,700)})):[];}catch{messages=[];}
+    if(!messages.length)messages=[{who:'bumble',text:'Buzz buzz! I’m Bumble, your little flower, joke, and weather buddy. Ask me about a flower, tell me to make you laugh, or ask for the weather!'}];
+    let jokeIndex=0,weatherBusy=false;
+    function save(){try{localStorage.setItem(KEY,JSON.stringify(messages.slice(-30)));}catch{}}
+    function add(who,text){messages.push({who,text:String(text).slice(0,700)});messages=messages.slice(-30);save();}
+    function history(){return messages.map(m=>'<div class="lj-chat-message '+(m.who==='you'?'mine':'theirs')+'"><span class="lj-chat-speaker">'+(m.who==='you'?'You':'Bumble 🐝')+'</span><p>'+escapeHtml(m.text)+'</p></div>').join('');}
+    function render(){
+      return '<section class="lj-chat"><span class="eyebrow">YOUR BUZZY LITTLE FRIEND</span><h1 class="page-title">Chat with Bumble.</h1><p class="page-description">He loves flowers, silly jokes, and watching the weather. This version has helpful built-in replies, not open-ended AI conversations.</p><div class="lj-chat-profile"><div class="lj-chat-profile-bee">'+garden.bee()+'</div><div><strong>Bumble the garden buddy</strong><small>Flower expert · Joke expert · Weather helper</small></div></div><div class="lj-chat-messages" id="lj-chat-messages" aria-live="polite">'+history()+'</div><div class="lj-chat-prompts"><button type="button" data-bumble-prompt="Tell me a joke">Tell me a joke</button><button type="button" data-bumble-prompt="Tell me about a flower">Flower facts</button><button type="button" data-bumble-prompt="What’s the weather?">Weather</button></div><form class="lj-chat-form" id="lj-chat-form"><label class="sr-only" for="lj-chat-input">Message Bumble</label><input id="lj-chat-input" maxlength="300" autocomplete="off" placeholder="Ask Bumble something..." required><button class="lj-chat-send" type="submit" aria-label="Send message">'+icon('arrow',20)+'</button></form><p class="lj-chat-note">Weather uses your approximate device location only after you allow it. Your chat stays in this browser.</p></section>';
+    }
+    function refresh(){
+      const area=document.querySelector('#lj-chat-messages');
+      if(area){area.innerHTML=history();area.scrollTop=area.scrollHeight;}
+    }
+    async function weather(){
+      if(weatherBusy)return;
+      weatherBusy=true;
+      if(!navigator.geolocation){add('bumble','I need location permission to check the local weather, and this browser doesn’t offer it. You can check your weather app instead.');refresh();weatherBusy=false;return;}
+      add('bumble','Let me peek outside! I’ll ask permission to use your approximate location.');
+      refresh();
+      try{
+        const position=await new Promise((resolve,reject)=>navigator.geolocation.getCurrentPosition(resolve,reject,{enableHighAccuracy:false,timeout:12000,maximumAge:900000}));
+        const lat=position.coords.latitude,lon=position.coords.longitude;
+        const url='https://api.open-meteo.com/v1/forecast?latitude='+encodeURIComponent(lat.toFixed(3))+'&longitude='+encodeURIComponent(lon.toFixed(3))+'&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto';
+        const response=await fetch(url,{cache:'no-store'});
+        if(!response.ok)throw Error('weather');
+        const data=await response.json();
+        if(!data.current||typeof data.current.temperature_2m!=='number')throw Error('weather');
+        const c=data.current,code=c.weather_code;
+        const description=code===0?'clear skies':code<=3?'a few clouds':code<=48?'foggy skies':code<=67?'rain or drizzle':code<=77?'snow':code<=82?'showers':code<=86?'snow showers':'stormy conditions';
+        add('bumble','Buzz! Right now it’s about '+Math.round(c.temperature_2m)+'°F (feels like '+Math.round(c.apparent_temperature)+'°F) with '+description+'. Wind: '+Math.round(c.wind_speed_10m)+' mph. If you’re visiting the garden outside, check for rain and dress comfortably! This is current weather, not a full forecast.');
+      }catch(err){
+        add('bumble',err&&err.code===1?'No worries! You didn’t allow location access, so I won’t check your weather.':'Oh honey! I couldn’t reach the live weather right now. Try again when you have a connection.');
+      }finally{weatherBusy=false;refresh();}
+    }
+    async function send(text){
+      text=String(text||'').trim().slice(0,300);if(!text)return;
+      add('you',text);
+      const input=text.toLowerCase();
+      if(/weather|temperature|forecast|outside|rain today|sunny today/.test(input)){refresh();await weather();return;}
+      let answer='';
+      if(/joke|funny|laugh|giggle|make me smile/.test(input)){answer=jokes[jokeIndex++%jokes.length];}
+      else if(/flower|bloom|plant|petal|garden|rose|daisy|lavender|tulip|sunflower|orchid|iris|peony|daffodil|hyacinth|pansy|violet|crocus|aster/.test(input)){
+        const found=flowerFacts.find(([name])=>input.includes(name.toLowerCase()));
+        if(found)answer=found[0]+' symbolizes '+found[1]+' in some flower traditions. '+found[2];
+        else{
+          const h=new Date().getHours(),f=flowerFacts[h];
+          answer='My flower for this hour is '+f[0]+'! It often represents '+f[1]+'. '+f[2]+' Ask me about another flower by name!';
+        }
+      }else if(/hello|hey|hi|buzz|bumble/.test(input))answer='Buzz buzz! I’m here! Want a flower fact, a silly joke, or a weather check?';
+      else if(/thank/.test(input))answer='You’re so welcome! Sending you a tiny golden sunshine hug.';
+      else if(/sad|tired|stress|hard day|down/.test(input))answer='I’m sorry it’s been a rough day. We don’t need to turn every feeling into a flower. Want a gentle flower fact or a silly joke?';
+      else answer='Buzz! I’m still learning. I know lots about my 24 flowers, I can tell silly jokes, and I can check local weather with your permission. Try one of those!';
+      add('bumble',answer);refresh();
+    }
+    function clear(){messages=[{who:'bumble',text:'Fresh little page! Want a flower fact, joke, or weather check?'}];save();refresh();}
+    return {render,send,refresh,clear};
+  })();
+  function renderTogether(){return bumbleChat.render();}
   function renderYou() {
     return `<span class="eyebrow">MADE TO BE YOURS</span><h1 class="page-title">Your space, your pace.</h1><p class="page-description">Your little moments are yours to keep. This version saves everything on this device, without an account.</p>
       ${garden.settings()}
@@ -1014,6 +1100,7 @@
     const target=e.target.closest('button');if(!target)return;
     if(target.dataset.add)pulseMomentTrigger(target,target.dataset.add);
     else if(target.dataset.goto)navigate(target.dataset.goto);
+    else if(target.dataset.bumblePrompt)bumbleChat.send(target.dataset.bumblePrompt);
     else if(target.hasAttribute('data-bumble-toggle')){companion.toggle();render();}
     else if(target.hasAttribute('data-garden')||target.hasAttribute('data-garden-tone')||target.hasAttribute('data-garden-week'))garden.click(target);
     else if(target.hasAttribute('data-sun-another')){sunshineOffset++;render();}
@@ -1030,12 +1117,13 @@
     else if(target.dataset.filter){journalFilter=target.dataset.filter;render();}
     else if(target.dataset.tool)handleTool(target.dataset.tool);
   });
-  content.addEventListener('change',e=>{
-    if(e.target.id==='lj-together-select'){
-      togetherSelectedId=e.target.value;
-      const preview=content.querySelector('#lj-together-preview');
-      if(preview){preview.innerHTML=togetherPreview();hydratePhotos(preview);}
-    }
+  content.addEventListener('submit',e=>{
+    if(e.target.id!=='lj-chat-form')return;
+    e.preventDefault();
+    const input=e.target.querySelector('#lj-chat-input');
+    const value=input?.value||'';
+    if(input)input.value='';
+    bumbleChat.send(value);
   });
   content.addEventListener('input',e=>{
     if(e.target.id==='journal-search'){
