@@ -578,10 +578,41 @@
       <div class="moment-actions-inline"><button class="small-icon-button" type="button" data-edit="${escapeHtml(m.id)}" aria-label="${m.note?'Edit note':'Add a note'} for ${momentName(m)}" title="${m.note?'Edit note':'Add a note'}">${icon('edit',16)}</button><button class="small-icon-button" type="button" data-delete="${escapeHtml(m.id)}" aria-label="Delete ${momentName(m)}" title="Delete">${icon('trash',16)}</button></div>
     </article>`;
   }
+  const garden = (function gardenBuilder(){
+  const BEE_KEY='little-joys.bumble.tone.v1';
+  let tone=localStorage.getItem(BEE_KEY)||'gentle', messageOffset=0;
+  const beeLines=[
+    'Bee honest… did something make you smile today?',
+    'The tiny moments matter too. I saved you a sunny spot!',
+    'Why did the bee have sticky hair? It used a honeycomb!',
+    'Your garden is always yours, even on a quiet day.',
+    'A little joy can bloom whenever it wants to.',
+    'How does a flower ride a bike? It petals!'
+  ];
+  const petals=['#f1b5b1','#f7d28c','#e6b7cb','#f4c69e','#d9c5ed','#fff1b4','#f4a99a'];
+  function seed(str){let h=2166136261;for(const c of String(str))h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0;}
+  function rnd(key,salt){return seed(key+':'+salt)/4294967295;}
+  function weekOf(date){const d=new Date(date);d.setHours(0,0,0,0);d.setDate(d.getDate()-(d.getDay()+6)%7);return d;}
+  function weekKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+  function items(start){const end=new Date(start);end.setDate(end.getDate()+7);return moments.filter(m=>{const t=new Date(m.timestamp);return t>=start&&t<end;});}
+  function label(start){const end=new Date(start);end.setDate(end.getDate()+6);return start.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' – '+end.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});}
+  function flower(id){const n=seed(id),p=petals[n%petals.length],count=5+n%4;let petalsHtml='';for(let i=0;i<count;i++)petalsHtml+='<ellipse cx="50" cy="28" rx="10" ry="17" fill="'+p+'" transform="rotate('+(i*360/count)+' 50 50)"/>';return '<svg viewBox="0 0 100 125" role="img" aria-label="Watercolor flower"><path d="M50 60Q44 96 49 122" stroke="#739366" fill="none" stroke-width="4"/><path d="M48 100Q17 74 19 95Q31 108 47 103" fill="#96b286"/><path d="M48 107Q78 84 79 101Q64 113 49 112" fill="#84a776"/>'+petalsHtml+'<circle cx="50" cy="50" r="12" fill="#e7aa50"/><circle cx="46" cy="46" r="3" fill="#fff1bc"/></svg>';}
+  function bee(){return '<svg viewBox="0 0 100 100" role="img" aria-label="Bumble the bee"><ellipse cx="31" cy="26" rx="18" ry="11" fill="#fffdf2" transform="rotate(-30 31 26)"/><ellipse cx="69" cy="26" rx="18" ry="11" fill="#fffdf2" transform="rotate(30 69 26)"/><ellipse cx="50" cy="59" rx="35" ry="29" fill="#f7d36f" stroke="#b88b3c" stroke-width="2"/><path d="M30 39Q24 57 32 78M69 39Q77 57 69 80" stroke="#806243" stroke-width="10" fill="none"/><ellipse cx="50" cy="59" rx="22" ry="25" fill="#fbdc89"/><circle cx="40" cy="56" r="3" fill="#523f33"/><circle cx="61" cy="56" r="3" fill="#523f33"/><path d="M44 67Q50 73 57 67" stroke="#523f33" stroke-width="2.5" fill="none"/><circle cx="28" cy="65" r="6" fill="#eda9a8" opacity=".6"/><circle cx="72" cy="65" r="6" fill="#eda9a8" opacity=".6"/></svg>';}
+  function positions(entries){const joys=entries.filter(m=>m.type==='joy').sort((a,b)=>String(a.timestamp).localeCompare(String(b.timestamp)));return joys.map((m,i)=>({m,x:10+(i%6)*15+rnd(m.id,'x')*5,y:75-Math.floor(i/6)*19+rnd(m.id,'y')*5,s:.85+rnd(m.id,'size')*.3}));}
+  function scene(entries,start){const pos=positions(entries),laughs=entries.filter(m=>m.type==='laugh').length,rows=Math.ceil(pos.length/6);const flowers=pos.map(({m,x,y,s})=>'<button class="lj-flower" type="button" data-edit="'+escapeHtml(m.id)+'" style="left:'+x+'%;top:'+Math.max(20,y)+'%;--flower-size:'+s+'" title="'+escapeHtml(new Date(m.timestamp).toLocaleString())+'">'+flower(m.id)+'</button>').join('');return '<div class="lj-garden-scene'+(laughs?' has-laughs':'')+'" style="min-height:'+Math.max(300,240+rows*65)+'px" role="group" aria-label="'+pos.length+' flowers, one per happy moment"><div class="lj-sky-sun">☀</div><div class="lj-hill lj-back"></div><div class="lj-hill lj-front"></div>'+(laughs?'<span class="lj-twinkle" aria-hidden="true">✧ ✦ ✧</span>':'')+flowers+(!pos.length?'<p class="lj-empty">A sunny little space for your first flower.<small>There is no rush to grow.</small></p>':'')+'<div class="lj-bee-fly" aria-hidden="true">'+bee()+'</div></div>';}
+  function home(){const start=weekOf(new Date()),entries=items(start),joys=entries.filter(m=>m.type==='joy').length,laughs=entries.filter(m=>m.type==='laugh').length;const line=beeLines[(seed(weekKey(new Date())+':'+new Date().getHours())+messageOffset)%beeLines.length];return '<section class="lj-garden"><div class="lj-garden-head"><div><span class="eyebrow">YOUR LITTLE GARDEN</span><h2>A pocketful of sunshine.</h2><p>'+escapeHtml(label(start))+'</p></div><div class="lj-count"><strong>'+joys+'</strong> '+(joys===1?'flower':'flowers')+'<small>'+laughs+' little laughs</small></div></div>'+scene(entries,start)+'<p class="lj-tip">Every happy moment plants exactly one flower. Tap any flower to revisit its memory.</p></section>'+(tone==='quiet'?'':'<section class="lj-bumble"><div class="lj-bee-face">'+bee()+'</div><div><strong>Buzz from Bumble</strong><p>'+escapeHtml(line)+'</p><button type="button" class="lj-mini-button" data-garden="bee">Another little buzz ↗</button></div></section>');}
+  function weeks(){const map=new Map(),now=weekOf(new Date());map.set(weekKey(now),now);for(const m of moments){const d=new Date(m.timestamp);if(!Number.isFinite(d.getTime()))continue;const wk=weekOf(d);map.set(weekKey(wk),wk);}const dates=[...map.values()].sort((a,b)=>b-a);return '<section class="lj-weeks"><span class="eyebrow">YOUR GARDEN ALBUM</span><h2>Your weeks in bloom.</h2><p>A different little garden for every week. Each flower is a memory you saved.</p>'+dates.map(start=>{const records=items(start),joys=records.filter(x=>x.type==='joy').length,laughs=records.filter(x=>x.type==='laugh').length;return '<article class="lj-week-card"><span class="eyebrow">YOUR WEEK IN BLOOM</span><h3>'+escapeHtml(label(start))+'</h3>'+scene(records,start)+'<p><b>'+joys+'</b> '+(joys===1?'flower':'flowers')+' · <b>'+laughs+'</b> '+(laughs===1?'laugh':'laughs')+'</p><button type="button" class="lj-save" data-garden-week="'+weekKey(start)+'">Save this week’s garden picture ↗</button></article>';}).join('')+'</section>';}
+  function settings(){return '<section class="lj-bee-settings"><h2>Meet Bumble</h2><p>Choose how often Bumble shares a gentle message. No pressure, no streaks.</p><div class="lj-tone-options">'+[['chatty','Chatty'],['gentle','Gentle'],['quiet','Quiet']].map(([value,name])=>'<button class="lj-tone '+(tone===value?'chosen':'')+'" data-garden-tone="'+value+'" type="button" aria-pressed="'+(tone===value)+'">'+name+'</button>').join('')+'</div></section>';}
+  function recapSvg(start,entries){const pos=positions(entries),n=pos.length,laughs=entries.filter(m=>m.type==='laugh').length;let floral='';for(const {m,x,y,s} of pos){const xx=40+x*8.8,yy=230+Math.max(25,y)*3.2,scale=.6*s;floral+='<g transform="translate('+xx.toFixed(0)+' '+yy.toFixed(0)+') scale('+scale.toFixed(2)+') translate(-50 -60)">'+flower(m.id).replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'')+'</g>';}const title=escapeHtml(label(start));return '<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640"><rect width="960" height="640" fill="#fff4cc"/><rect x="24" y="24" width="912" height="592" rx="32" fill="#fffaf0" stroke="#dfc794" stroke-width="3"/><text x="480" y="98" font-family="Georgia,serif" font-size="42" text-anchor="middle" fill="#76572f">Your week in bloom</text><text x="480" y="139" font-family="Georgia,serif" font-size="23" text-anchor="middle" fill="#9b7b50">'+title+'</text><circle cx="777" cy="227" r="65" fill="#ffe49a"/><path d="M24 470Q200 370 405 464T936 460V610H24Z" fill="#d2dcb7"/><path d="M24 523Q280 420 510 508T936 497V610H24Z" fill="#b9d09a"/>'+floral+(laughs?'<text x="130" y="240" fill="#d7ae58" font-size="35">✧ ✦ ✧</text>':'')+'<text x="480" y="580" font-family="Georgia,serif" font-size="22" text-anchor="middle" fill="#82643e">'+n+' flowers · '+laughs+' laughs · Little Joys (: </text></svg>';}
+  async function save(key){const start=new Date(key+'T00:00:00');if(!Number.isFinite(start.getTime()))return;let url;try{const blob=new Blob([recapSvg(start,items(start))],{type:'image/svg+xml'});url=URL.createObjectURL(blob);const image=new Image();await new Promise((ok,no)=>{image.onload=ok;image.onerror=no;image.src=url;});const canvas=document.createElement('canvas');canvas.width=960;canvas.height=640;canvas.getContext('2d').drawImage(image,0,0);const png=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!png)throw new Error('Export failed');const downloadUrl=URL.createObjectURL(png),a=document.createElement('a');a.href=downloadUrl;a.download='little-joys-garden-'+key+'.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(downloadUrl),4000);showToast('Your little garden postcard is saved.');}catch(e){showToast('Could not export this picture on this device.');}finally{if(url)URL.revokeObjectURL(url);}}
+  function click(el){if(el.hasAttribute('data-garden')){messageOffset++;render();return true;}if(el.dataset.gardenTone){tone=el.dataset.gardenTone;localStorage.setItem(BEE_KEY,tone);render();return true;}if(el.dataset.gardenWeek){save(el.dataset.gardenWeek);return true;}return false;}
+  return {home,weeks,settings,click};
+})();
   function renderToday() {
     const today=todayMoments(), counts=countTypes(today);
     return `<div class="date-line">${escapeHtml(dateText(new Date()))}</div>
       <h1 class="welcome-title">Here's to the <em>little</em> things.</h1>
+      ${garden.home()}
       <section class="hero-card" aria-label="Today's moments">
         ${smileButton('sunshine-hero')}
         <div class="hero-top">${icon('sparkle',14)} Your day, in little moments</div>
@@ -620,7 +651,7 @@
   }
   function renderPatterns() {
     const week=getWeek();const laughs=week.reduce((n,d)=>n+d.laugh,0);const joys=week.reduce((n,d)=>n+d.joy,0);const days=week.filter(d=>d.items.length).length;const max=Math.max(...week.map(d=>Math.max(d.laugh,d.joy)),1);
-    return `<span class="eyebrow">A GENTLER KIND OF REFLECTION</span><h1 class="page-title">Look at the little things.</h1><p class="page-description">Your past seven days, without goals to hit or streaks to keep.</p>
+    return `${garden.weeks()}<span class="eyebrow">A GENTLER KIND OF REFLECTION</span><h1 class="page-title">Look at the little things.</h1><p class="page-description">Your past seven days, without goals to hit or streaks to keep.</p>
       <section class="week-card"><div class="subtle-row"><strong style="font-size:13px">A week of moments</strong><span class="eyebrow" style="font-size:9px">LAST 7 DAYS</span></div><p class="week-intro">Only moments you chose to log are shown.</p>
         <div class="week-bars" role="img" aria-label="Over the last seven days, you logged ${laughs} laughs and ${joys} happy moments.">${week.map((d,i)=>`<div class="day-column"><div class="day-total">${d.items.length||''}</div><div class="bar-pair"><div class="bar laugh ${d.laugh?'':'zero'}" style="height:${d.laugh?Math.max(7,d.laugh/max*100):3}%" title="${d.laugh} laughs"></div><div class="bar joy ${d.joy?'':'zero'}" style="height:${d.joy?Math.max(7,d.joy/max*100):3}%" title="${d.joy} happy moments"></div></div><span class="day-name ${i===6?'today':''}">${escapeHtml(d.date.toLocaleDateString(undefined,{weekday:'short'}).slice(0,2))}</span></div>`).join('')}</div>
         <div class="chart-legend"><span><i class="legend-mark laugh"></i>Laughs</span><span><i class="legend-mark joy"></i>Happy moments</span></div>
@@ -637,6 +668,7 @@
   }
   function renderYou() {
     return `<span class="eyebrow">MADE TO BE YOURS</span><h1 class="page-title">Your space, your pace.</h1><p class="page-description">Your little moments are yours to keep. This version saves everything on this device, without an account.</p>
+      ${garden.settings()}
       ${sunshineSettingsHtml()}
       <div class="section-heading"><h2>Your journal</h2></div>
       <div class="settings-card">
@@ -767,6 +799,7 @@
     const target=e.target.closest('button');if(!target)return;
     if(target.dataset.add)pulseMomentTrigger(target,target.dataset.add);
     else if(target.dataset.goto)navigate(target.dataset.goto);
+    else if(target.hasAttribute('data-garden')||target.hasAttribute('data-garden-tone')||target.hasAttribute('data-garden-week'))garden.click(target);
     else if(target.hasAttribute('data-sun-another')){sunshineOffset++;render();}
     else if(target.hasAttribute('data-sun-toggle-card')){sunshineSettings.show=!sunshineSettings.show;saveSunshineSettings();render();}
     else if(target.dataset.sunCategory){sunshineSettings.type=target.dataset.sunCategory;sunshineOffset=0;saveSunshineSettings();render();}
