@@ -1217,6 +1217,55 @@
       ['Hyacinth','steadfastness','Hyacinths grow dense spikes of fragrant starry flowers.'],
       ['Aster','patience and affection','Asters have many slender ray petals surrounding a central disk.']
     ];
+    // Practical, offline flower guide. Conditions are general starting points;
+    // species, cultivar, climate, and container size can change exact care.
+    const flowerCare=[["Moonflower","Full sun","Water regularly while establishing; do not leave roots soggy","Fertile, well-drained soil","Summer into fall","Sow after frost in warm soil; give the climbing vine a strong support","Seeds and plant parts may be harmful if swallowed"],["Night-blooming jasmine","Full sun to partial shade","Even moisture while growing, less in cool weather","Rich, free-draining potting mix","Warm months; fragrant at night","Cestrum nocturnum is a tender shrub, not a true jasmine; protect from frost","Toxic if ingested; keep away from pets"],["Forget-me-not","Part shade or gentle sun","Keep evenly moist, especially in hot weather","Humus-rich, well-drained soil","Spring","Often self-seeds; thin volunteers where they are crowded","Check exact species before assuming pet safety"],["Anemone","Sun to part shade, depending on species","Even moisture in active growth; avoid waterlogging","Well-drained soil enriched with compost","Spring or fall, depending on species","Choose the type before planting: spring bulbs and fall-blooming Japanese anemones need different care","Some anemones are toxic if eaten"],["Lily of the valley","Shade to part shade","Keep lightly moist, not waterlogged","Moist, humus-rich soil","Spring","Spreads by underground rhizomes; a contained shady bed is best","Highly toxic to pets and people if eaten"],["Morning glory","Full sun","Water deeply when dry; avoid soggy soil","Average, well-drained soil","Summer to fall","Plant after frost and provide a trellis; avoid excessive nitrogen fertilizer","Seeds can be toxic if eaten"],["Daffodil","Sun to light shade","Water during spring growth; allow less moisture after foliage dies back","Well-drained soil","Spring","Plant bulbs in fall, pointed end up; leave leaves until yellow after flowering","Bulbs and other parts are toxic to pets"],["Daisy","Full sun to part sun","Water when the top layer dries; more during establishment","Well-drained soil","Late spring to summer, by species","Deadhead spent blooms; Shasta daisies and oxeye daisies have different habits","Species matter for pet safety"],["Freesia","Full sun with protection from heat","Moist in active growth; reduce water in dormancy","Very well-drained, fertile soil","Spring in mild climates; timing varies elsewhere","Grow corms in pots where winters freeze; stake taller stems","Check species for pet safety"],["Cosmos","Full sun","Moderate water while establishing; relatively drought-tolerant later","Well-drained, not overly rich soil","Summer to frost","Sow after frost; too much fertilizer creates leaves instead of flowers","Avoid assuming all ornamental plants are safe to eat"],["Buttercup","Sun to partial shade","Keep evenly moist","Moist but draining soil","Spring to early summer, by species","True Ranunculus species vary widely; identify the variety before planting","Buttercups can be toxic to pets"],["Camellia","Part shade; morning sun ideal","Deep water during dry spells; avoid wet feet","Acidic, organically rich, well-drained soil","Fall to spring depending on variety","Protect buds from harsh afternoon sun and drying winter winds","Confirm variety before assessing pet safety"],["Sunflower","Full sun, ideally 6–8+ hours","Water deeply at root level when soil dries","Well-drained, moderately fertile soil","Summer to fall","Direct sow after frost; tall types may need staking","Keep seeds and garden chemicals out of pets' reach"],["Goldenrod","Full sun to part sun","Water while establishing; many species tolerate some drought","Well-drained ordinary garden soil","Late summer to fall","Native goldenrods support pollinators; select a species suited to your garden","Check exact species for pet safety"],["Zinnia","Full sun","Water at soil level when dry; avoid soaking leaves","Well-drained soil","Summer to frost","Sow after frost and space for airflow to discourage powdery mildew","Usually grown as ornamental annuals"],["Peony","Full sun; light afternoon shade in hot climates","Water deeply during active growth, especially in drought","Fertile, well-drained soil","Late spring to early summer","Plant herbaceous peony eyes shallowly; planting too deep can prevent flowers","Peonies can upset pets if eaten"],["Poppy","Full sun","Moderate, species-specific; avoid wet roots","Loose, well-drained soil","Spring to summer, by species","Many poppies resent transplanting; direct sow suitable types","Poppies can be toxic; species differ"],["Dahlia","Full sun; afternoon shade in intense heat","Even moisture once growing; avoid soaking newly planted tubers","Rich, well-drained soil","Summer until frost","Plant tubers after frost; pinch young plants for branching and stake tall types","Avoid pets eating tubers or garden products"],["Rose","Full sun, generally 6+ hours","Deep soak at base when dry; avoid constantly wet leaves","Rich, well-drained soil","Spring to fall, depending on rose","Prune for airflow and remove diseased leaves; exact pruning timing depends on rose type","Thorns can injure pets"],["Lavender","Full sun, 6+ hours","Water deeply but infrequently once established","Lean, sharply drained soil","Late spring through summer, by type","Avoid heavy wet soil and frequent sprinklers; prune lightly into green growth","Can cause stomach upset in pets if eaten"],["Hydrangea","Morning sun and afternoon shade in hot climates","Consistent moisture; soak deeply during dry heat","Compost-rich, moist but well-drained soil","Late spring to fall depending on type","Prune only after identifying the hydrangea type: some bloom on old wood","Toxic to dogs and cats if eaten"],["Iris","Full sun to part sun","Moderate water in growth; avoid constantly wet rhizomes","Well-drained soil","Spring to early summer, by type","Keep bearded iris rhizomes at soil surface and divide overcrowded clumps","Iris rhizomes can be toxic to pets"],["Sweet pea","Full sun, with cool roots","Consistent water as plants establish and bloom","Fertile, well-drained soil","Spring to early summer in cool climates","Sow in cool weather and offer a trellis; pick blooms to prolong flowering","Ornamental sweet peas are toxic and not edible peas"],["Aster","Full sun to part sun","Moderate moisture, especially in dry spells","Well-drained soil","Late summer to fall","Pinch in early summer for bushier plants; many asters feed fall pollinators","Confirm species before making pet-safety claims"]];
+    let lastCareFlower='';
+    const cleanFlowerName=s=>String(s).toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/ +/g,' ').trim();
+    function namedFlower(input){
+      const q=' '+cleanFlowerName(input)+' ';
+      const aliases={'roses':'Rose','rose bushes':'Rose','hydrangeas':'Hydrangea','sunflowers':'Sunflower','dahlias':'Dahlia','daffodils':'Daffodil','peonies':'Peony','zinnias':'Zinnia','lavenders':'Lavender','irises':'Iris','asters':'Aster','poppies':'Poppy','cosmos flowers':'Cosmos','morning glories':'Morning glory','moonflowers':'Moonflower','sweet peas':'Sweet pea','forget me nots':'Forget-me-not','lilies of the valley':'Lily of the valley'};
+      for(const [a,n] of Object.entries(aliases))if(q.includes(' '+a+' '))return n;
+      return flowerCare.find(f=>q.includes(' '+cleanFlowerName(f[0])+' '))?.[0]||'';
+    }
+    function rememberFlower(name){lastCareFlower=name;}
+    function flowerCareReply(input){
+      const explicit=namedFlower(input);
+      const intent=/grow|care|plant|sun|shade|light|water|soil|fertili|feed|bloom|season|flower|pet|dog|cat|toxic|poison|safe|prun|trim|cut|deadhead|seed|sow|pest|diseas|yellow|wilt|brown|dying|not blooming|indoors|pot|container|winter|frost|meaning|symbol|fact|interesting|tell me about|help/.test(input);
+      // Do not intercept general garden status or flower counts.
+      if(!explicit&&!intent)return '';
+      const topic=/poison|toxic|pet|dog|cat|safe/.test(input)?'safety':
+        /sun|shade|light|window/.test(input)?'sun':
+        /water|thirst|dry|sogg|wet|wilt/.test(input)?'water':
+        /soil|drain|compost|fertili|feed|ph\b/.test(input)?'soil':
+        /when.*(bloom|flower)|bloom.*when|season|month/.test(input)?'season':
+        /prun|trim|cut|deadhead|propagat|seed|sow|plant|pot|container|winter|frost/.test(input)?'tip':
+        /not bloom|no flower|yellow|brown|dying|pest|diseas|problem/.test(input)?'trouble':
+        /meaning|symbol|represent/.test(input)?'meaning':'overview';
+      let flower=explicit;
+      if(!flower&&/another|random|surprise|flower fact|tell me about a flower/.test(input)){
+        flower=flowerCare[Math.floor(Math.random()*flowerCare.length)][0];
+      }
+      if(!flower&&lastCareFlower)flower=lastCareFlower;
+      if(!flower){
+        for(let i=messages.length-2;i>=0;i--){if(messages[i].who==='you'){flower=namedFlower(messages[i].text);if(flower)break;}}
+      }
+      if(!flower)return /flower|plant|grow|care|sun|water|soil/.test(input)?'I can help with all 24 Flower Clock blooms! Tell me which flower you mean—like hydrangea, lavender, dahlia, or sunflower—and ask about sun, watering, soil, flowering time, or pet safety.':'';
+      rememberFlower(flower);
+      const f=flowerCare.find(x=>x[0]===flower);
+      if(!f)return '';
+      const [name,sun,water,soil,season,tip,caution]=f;
+      const meaning=(flowerFacts.find(x=>x[0].toLowerCase()===name.toLowerCase())||[])[1];
+      if(topic==='sun')return name+' light needs: '+sun+'. '+tip;
+      if(topic==='water')return name+' watering: '+water+'. Check the soil before watering; pots dry faster than beds. '+tip;
+      if(topic==='soil')return name+' soil: '+soil+'. '+tip;
+      if(topic==='season')return name+' flowering season: '+season+'. Timing depends on climate and variety. '+tip;
+      if(topic==='safety')return name+' and pets: '+caution+'. Please confirm the exact botanical name with a veterinarian or reliable toxic-plant database before letting pets near it.';
+      if(topic==='tip')return 'Growing '+name+': '+tip+' Light: '+sun+'. Soil: '+soil+'.';
+      if(topic==='trouble')return 'Troubleshooting '+name+': Start by checking sunlight ('+sun.toLowerCase()+'), drainage ('+soil.toLowerCase()+') and moisture ('+water.toLowerCase()+'). '+tip+' If you tell me what the leaves or buds look like, I can help narrow down common causes.';
+      if(topic==='meaning')return name+(meaning?' often symbolizes '+meaning+' in some flower traditions. ':' has meanings that vary across traditions. ')+tip;
+      return 'Buzz! '+name+' care guide: Sun: '+sun+'. Water: '+water+'. Soil: '+soil+'. Flowers: '+season+'. My tip: '+tip+' Pet note: '+caution+'. Ask me “How much water?” or “When does it bloom?” to dig deeper!';
+    }
     const jokes=[
       'Why did the bee have sticky hair? It used a honeycomb!',
       'What do you call a flower that runs on electricity? A power plant!',
@@ -1229,13 +1278,13 @@
     ];
     let messages;
     try{const raw=JSON.parse(localStorage.getItem(KEY)||'[]');messages=Array.isArray(raw)?raw.filter(x=>x&&['you','bumble'].includes(x.who)&&typeof x.text==='string').slice(-30).map(x=>({who:x.who,text:x.text.slice(0,700)})):[];}catch{messages=[];}
-    if(!messages.length)messages=[{who:'bumble',text:'Buzz buzz! I’m Bumble, your little flower, joke, and weather buddy. Ask me about a flower, tell me to make you laugh, or ask for the weather!'}];
+    if(!messages.length)messages=[{who:'bumble',text:'Buzz buzz! I’m Bumble, your flower-growing buddy. Ask me how to grow any of your 24 Flower Clock blooms, including sun, water, soil, bloom time, or pet safety!'}];
     let jokeIndex=0,weatherBusy=false;
     function save(){try{localStorage.setItem(KEY,JSON.stringify(messages.slice(-30)));}catch{}}
     function add(who,text){messages.push({who,text:String(text).slice(0,700)});messages=messages.slice(-30);save();}
     function history(){return messages.map(m=>'<div class="lj-chat-message '+(m.who==='you'?'mine':'theirs')+'"><span class="lj-chat-speaker">'+(m.who==='you'?'You':'Bumble 🐝')+'</span><p>'+escapeHtml(m.text)+'</p></div>').join('');}
     function render(){
-      return '<section class="lj-chat"><span class="eyebrow">YOUR BUZZY LITTLE FRIEND</span><h1 class="page-title">Chat with Bumble.</h1><p class="page-description">He loves flowers, silly jokes, weather, and checking how your garden is growing. This version has helpful built-in replies, not open-ended AI conversations.</p><div class="lj-chat-profile"><div class="lj-chat-profile-bee">'+garden.bee()+'</div><div><strong>Bumble the garden buddy</strong><small>Flower expert · Jokes · Weather · Garden status</small></div></div><div class="lj-chat-messages" id="lj-chat-messages" aria-live="polite">'+history()+'</div><div class="lj-chat-prompts"><button type="button" data-bumble-prompt="Tell me a joke">Tell me a joke</button><button type="button" data-bumble-prompt="Tell me about a flower">Flower facts</button><button type="button" data-bumble-prompt="What’s the weather?">Weather</button><button type="button" data-bumble-prompt="How is my garden doing?">Garden status</button><button type="button" data-bumble-prompt="What hour am I happiest?">Happy hours</button><button type="button" data-bumble-prompt="When did I laugh the most?">Laugh hours</button></div><form class="lj-chat-form" id="lj-chat-form"><label class="sr-only" for="lj-chat-input">Message Bumble</label><input id="lj-chat-input" maxlength="300" autocomplete="off" placeholder="Ask Bumble something..." required><button class="lj-chat-send" type="submit" aria-label="Send message">'+icon('arrow',20)+'</button></form><p class="lj-chat-note">Weather uses your approximate device location only after you allow it. Your chat stays in this browser.</p></section>';
+      return '<section class="lj-chat"><span class="eyebrow">YOUR BUZZY LITTLE FRIEND</span><h1 class="page-title">Chat with Bumble.</h1><p class="page-description">Ask him how to grow your favorite Flower Clock blooms: sunlight, watering, soil, bloom season, troubleshooting, or pet safety. Bumble uses an offline plant guide, not open-ended AI.</p><div class="lj-chat-profile"><div class="lj-chat-profile-bee">'+garden.bee()+'</div><div><strong>Bumble the flower guide</strong><small>24 flowers · Plant care · Weather · Garden</small></div></div><div class="lj-chat-messages" id="lj-chat-messages" aria-live="polite">'+history()+'</div><div class="lj-chat-prompts"><button type="button" data-bumble-prompt="Tell me a joke">Tell me a joke</button><button type="button" data-bumble-prompt="How do I grow lavender?">Growing tips</button><button type="button" data-bumble-prompt="How much sun do hydrangeas need?">Sun & shade</button><button type="button" data-bumble-prompt="When do dahlias bloom?">Bloom season</button><button type="button" data-bumble-prompt="What’s the weather?">Weather</button><button type="button" data-bumble-prompt="How is my garden doing?">Garden status</button><button type="button" data-bumble-prompt="What hour am I happiest?">Happy hours</button><button type="button" data-bumble-prompt="When did I laugh the most?">Laugh hours</button></div><form class="lj-chat-form" id="lj-chat-form"><label class="sr-only" for="lj-chat-input">Message Bumble</label><input id="lj-chat-input" maxlength="300" autocomplete="off" placeholder="Ask Bumble something..." required><button class="lj-chat-send" type="submit" aria-label="Send message">'+icon('arrow',20)+'</button></form><p class="lj-chat-note">Weather uses your approximate device location only after you allow it. Your chat stays in this browser.</p></section>';
     }
     function refresh(){
       const area=document.querySelector('#lj-chat-messages');
@@ -1300,6 +1349,9 @@
       add('you',text);
       const input=text.toLowerCase();
       if(/weather|temperature|forecast|outside|rain today|sunny today/.test(input)){refresh();await weather();return;}
+      // Named flowers and follow-up care questions take priority over the app's virtual garden report.
+      const careAnswer=flowerCareReply(input);
+      if(careAnswer){add('bumble',careAnswer);refresh();return;}
       if(/garden status|garden doing|how is my garden|my garden|my flowers|flowers do i have|what flowers|which flowers|flower types|flower list|varieties|species|still growing|fully bloom|watered|flower growth|growth stage|grow my flowers|when did i laugh|laugh.*most|most.*laugh|when am i happy|when am i happiest|what hour|which hour|happy hours|laugh hours|happiest hour|time of day|happiness pattern/.test(input)){
         add('bumble',gardenReport(input));refresh();return;
       }
@@ -1315,7 +1367,7 @@
       }else if(/hello|hey|hi|buzz|bumble/.test(input))answer='Buzz buzz! I’m here! Want a flower fact, a joke, a weather check, or your garden status?';
       else if(/thank/.test(input))answer='You’re so welcome! Sending you a tiny golden sunshine hug.';
       else if(/sad|tired|stress|hard day|down/.test(input))answer='I’m sorry it’s been a rough day. We don’t need to turn every feeling into a flower. Want a gentle flower fact or a silly joke?';
-      else answer='Buzz! I’m still learning. I know my 24 flowers, silly jokes, live weather with permission, and your garden status—including when you’ve logged the most happy moments and laughs. Try asking!';
+      else answer='Buzz! Ask me about growing one of our 24 flowers—like “How do I grow lavender?”, “Is lily of the valley safe for dogs?”, or “Why won’t my hydrangea bloom?” I also know jokes, weather, and your garden status!';
       add('bumble',answer);refresh();
     }
     function clear(){messages=[{who:'bumble',text:'Fresh little page! Want a flower fact, joke, or weather check?'}];save();refresh();}
