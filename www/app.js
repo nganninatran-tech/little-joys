@@ -1350,7 +1350,7 @@
       aiBusy=true;
       const historyForAI=messages.slice(-9,-1).map(m=>({who:m.who,text:m.text}));
       try{
-        const response=await fetch('/.netlify/functions/bumble',{
+        const response=await fetch('/api/bumble',{
           method:'POST',headers:{'content-type':'application/json'},
           body:JSON.stringify({message:text,history:historyForAI})
         });
