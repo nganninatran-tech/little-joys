@@ -600,23 +600,84 @@
   function label(start){const end=new Date(start);end.setDate(end.getDate()+6);return start.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' – '+end.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});}
   // One moment = one flower. Local hour (0–23) chooses one of 24 distinct botanical designs.
   // Its shape is stable across visits, and morning vs evening flowers differ.
+  // 24 hand-illustrated botanical silhouettes for the Flower Clock.
+  // One type per local hour; flower meaning is the Flower Book's traditional association.
+  // No decorative flowers are added to the count.
   function flower(moment){
     const hour=new Date(moment.timestamp).getHours();
-    const [flowerName,flowerMeaning]=FLOWER_CLOCK[hour];
-    const palette=['#eac6e7','#c6bde5','#d4b7da','#e0bbda','#b5c9e7','#c7dfe7',
-      '#f5d2b7','#f7d69e','#f4c5a1','#f6bbaf','#f1baa8','#f7e1a6',
-      '#f5cf79','#f4bd77','#f6d989','#f0b6a4','#e7b5bf','#e3b5cc',
-      '#c4b8df','#b2b9df','#a9c7d8','#d4bbdf','#e4c1dc','#e4c8ed'];
-    const p=palette[hour], n=hour%6, petalCount=5+(hour%5);
-    let crown='';
-    if(n===0){for(let i=0;i<petalCount;i++)crown+='<ellipse cx="50" cy="26" rx="8" ry="20" fill="'+p+'" stroke="#d6a59b" stroke-width=".7" transform="rotate('+(i*360/petalCount)+' 50 50)"/>';}
-    else if(n===1){for(let i=0;i<petalCount;i++)crown+='<ellipse cx="50" cy="29" rx="12" ry="15" fill="'+p+'" transform="rotate('+(i*360/petalCount)+' 50 50)"/>';}
-    else if(n===2){for(let i=0;i<petalCount;i++)crown+='<path d="M50 48 Q34 29 50 11 Q66 29 50 48" fill="'+p+'" stroke="#d3a4a3" stroke-width="1" transform="rotate('+(i*360/petalCount)+' 50 50)"/>';}
-    else if(n===3){for(let i=0;i<petalCount;i++)crown+='<ellipse cx="50" cy="34" rx="7" ry="14" fill="'+p+'" transform="rotate('+(i*360/petalCount)+' 50 50)"/>';crown+='<circle cx="50" cy="50" r="18" fill="none" stroke="'+p+'" stroke-width="7"/>';}
-    else if(n===4){for(let i=0;i<petalCount;i++)crown+='<ellipse cx="50" cy="28" rx="6" ry="19" fill="'+p+'" transform="rotate('+(i*360/petalCount)+' 50 50)"/>';for(let i=0;i<petalCount;i++)crown+='<ellipse cx="50" cy="39" rx="5" ry="10" fill="#fff5da" transform="rotate('+(i*360/petalCount)+' 50 50)"/>';}
-    else {for(let i=0;i<petalCount;i++)crown+='<path d="M50 50 C33 31 38 17 50 15 C62 17 67 31 50 50" fill="'+p+'" transform="rotate('+(i*360/petalCount)+' 50 50)"/>';}
-    const middle=hour<6?'#e8ba65':hour<12?'#efc365':hour<18?'#e8a74b':'#d9a8a1';
-    return '<svg viewBox="0 0 100 125" role="img" aria-label="'+flowerName+' — '+flowerMeaning+'"><path d="M50 60Q44 96 49 122" stroke="#739366" fill="none" stroke-width="4"/><path d="M48 100Q17 74 19 95Q31 108 47 103" fill="#96b286"/><path d="M48 107Q78 84 79 101Q64 113 49 112" fill="#84a776"/>'+crown+'<circle cx="50" cy="50" r="10" fill="'+middle+'"/><circle cx="46" cy="46" r="2.5" fill="#fff6cb"/></svg>';
+    const [name,meaning]=FLOWER_CLOCK[hour];
+    const pet=(x,y,rx,ry,c,rot=0,stroke='')=>'<ellipse cx="'+x+'" cy="'+y+'" rx="'+rx+'" ry="'+ry+'" fill="'+c+'" stroke="'+(stroke||c)+'" stroke-width=".65" transform="rotate('+rot+' '+x+' '+y+')"/>';
+    const path=(d,c,stroke='',w=1)=>'<path d="'+d+'" fill="'+c+'" stroke="'+(stroke||c)+'" stroke-width="'+w+'" stroke-linejoin="round" stroke-linecap="round"/>';
+    const circle=(x,y,r,c)=>'<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+c+'"/>';
+    const repeat=(n,f)=>Array.from({length:n},(_,i)=>f(i)).join('');
+    const radial=(n,rx,ry,c,offset=28,shift=0)=>repeat(n,i=>pet(50,offset,rx,ry,c,i*360/n+shift));
+    let head='',stem='',leaves='',accent='';
+    const normalStem=()=>{stem=path('M50 55 Q47 82 50 121','none','#76966a',3.5);leaves=path('M49 96Q20 76 23 100Q38 108 49 99','#91b582')+path('M50 105Q79 81 77 102Q65 115 50 108','#82a473');};
+    const bell=(x,y,c)=>path('M'+(x-7)+' '+(y-9)+' Q'+x+' '+(y-16)+' '+(x+7)+' '+(y-9)+' L'+(x+8)+' '+(y+3)+' Q'+x+' '+(y+12)+' '+(x-8)+' '+(y+3)+' Z',c,'#9b9ab2');
+    normalStem();
+    switch(hour){
+      case 0: // Snowdrop — hanging white, three long petals
+        stem=path('M46 121Q45 71 57 39Q65 28 69 38','none','#809d73',3);
+        head=path('M68 36Q49 47 53 68Q60 74 68 51Z','#fffdf1','#c5cbba')+path('M68 37Q65 60 77 68Q84 55 68 37Z','#f7fcf0','#c5cabc')+path('M68 39Q65 62 66 73Q73 64 68 39Z','#e5f0dd','#a7c1a1');
+        break;
+      case 1: // Violet — asymmetrical purple heart-shaped petals
+        head=pet(34,39,15,13,'#8b78c0',-22)+pet(64,39,15,13,'#9b8ad0',18)+pet(50,30,12,15,'#a89ada')+pet(37,61,16,14,'#9178be',22)+pet(64,60,16,15,'#947ac0',-24)+circle(50,52,7,'#f2e4b1');break;
+      case 2: // Forget-me-not — sprays of tiny five-petal blue flowers
+        stem=path('M50 121Q54 81 46 48M49 87Q29 64 28 38M50 75Q68 48 74 28','none','#7fa27a',3);
+        leaves=path('M49 93Q23 72 26 92Q40 104 49 99','#96b68b');
+        head=repeat(9,i=>{const x=26+(i%3)*23+(i%2)*3,y=25+Math.floor(i/3)*19;return repeat(5,k=>pet(x,y-6,4.3,6.8,'#94c8ed',k*72))+circle(x,y,3,'#f7d66c');});break;
+      case 3: // Bluebell — arching blue bell sprays
+        stem=path('M48 122Q43 61 66 29','none','#71997a',3);
+        head=repeat(6,i=>{const x=65-i*5,y=30+i*10;return path('M'+x+' '+y+'q-5 5 -5 12q-9 12 -12 1q-5 -5 -1 -9q5 -9 18 -10Z','#8d9fd4','#657bb2');});break;
+      case 4: // Lily of the valley — small white bell clusters
+        stem=path('M49 123Q62 83 53 29','none','#719b67',3);
+        head=repeat(7,i=>{const side=i%2?-1:1,x=55+side*(12+i%3*3),y=32+i*10;return path('M54 '+(y-6)+'Q'+x+' '+(y-2)+' '+x+' '+(y+2),'none','#88a677',1.7)+bell(x,y,'#f9fcf2');});break;
+      case 5: // Crocus — six vertical tapered tepals
+        head=repeat(6,i=>path('M50 72Q'+(30+i*6)+' 39 '+(38+i*5)+' 17Q'+(50+i)+' 37 50 72Z',i%2?'#b19bd3':'#ccbae7','#a999ca'));accent=path('M50 62V30','none','#e8ad42',3);break;
+      case 6: // Daffodil — trumpet center with six pointed petals
+        head=radial(6,12,19,'#f2df85',24,30)+circle(50,50,15,'#f5bd48')+path('M39 44Q50 36 61 44L64 57Q50 66 36 57Z','#efa741','#ce8c37');break;
+      case 7: // Daisy — slender white rays and yellow disk
+        head=radial(15,6,18,'#fff9ec',27)+circle(50,50,14,'#edc566')+circle(47,46,3,'#f6e6a0');break;
+      case 8: // Freesia — angled stem with trumpet blossoms
+        stem=path('M49 121Q52 74 33 26','none','#78976a',3);
+        head=repeat(5,i=>{const x=34+i*9,y=30+i*12;return path('M'+(x-7)+' '+(y+7)+'Q'+(x-20)+' '+(y-10)+' '+x+' '+(y-12)+'Q'+(x+11)+' '+(y-8)+' '+(x+8)+' '+(y+8)+'Z',i%2?'#f7d5a7':'#f5e3c3','#e7bb8e')+circle(x-3,y,3,'#f8bd79');});break;
+      case 9: // Tulip — upright goblet
+        head=path('M28 58Q22 38 29 23Q39 30 50 39Q60 23 70 22Q79 44 72 58Q65 79 50 79Q33 78 28 58Z','#eca7a5','#d78d92')+path('M43 70Q39 42 49 26Q62 41 58 71Z','#f5c7b7','#dba7a2');break;
+      case 10: // Garden pink / Dianthus — five frilled serrated petals
+        head=repeat(6,i=>path('M48 50L39 20l6 5 5-8 5 8 6-5-2 30Z','#e9a4bb','#cf86a2').replace('M48 50','M50 50').replace('<path ','<path transform="rotate('+(i*60)+' 50 50)" '))+circle(50,50,8,'#a76d92');break;
+      case 11: // Pansy — contrasting blotches on broad petals
+        head=pet(34,36,17,16,'#9376bb',-22)+pet(66,36,17,16,'#9f87c9',22)+pet(50,28,15,18,'#b2a2d4')+pet(35,61,17,19,'#e3bc5e',-25)+pet(65,61,17,19,'#e6c671',25)+circle(50,49,9,'#553f79')+circle(50,51,3,'#e7ca68');break;
+      case 12: // Sunflower — densely spaced golden rays, brown seed head
+        head=radial(19,7,19,'#f3c44f',25)+circle(50,50,19,'#735135')+repeat(10,i=>circle(40+(i%5)*5,42+Math.floor(i/5)*11,1.4,'#d3a665'));break;
+      case 13: // Goldenrod — plume of golden tiny buds
+        stem=path('M48 121Q45 80 52 26','none','#75936c',3);
+        head=repeat(31,i=>{const row=Math.floor(i/6),col=i%6,x=50+(col-2.7)*(3+row*.7),y=25+row*8;return circle(x,y,2.2+(i%3)*.35,'#e6b651');});break;
+      case 14: // Coreopsis — bright ray petals with scalloped tips
+        head=repeat(9,i=>path('M50 49Q33 34 35 21Q39 17 43 22Q51 13 58 23Q64 38 50 49Z','#f3ce63','#dbae4c').replace('<path ','<path transform="rotate('+(i*40)+' 50 50)" '))+circle(50,50,11,'#ad7344');break;
+      case 15: // Peony — many ruffled layers
+        head=radial(7,15,19,'#e8a8b1',25)+radial(9,10,14,'#f1c2c7',35,10)+radial(7,7,10,'#f8d4d3',41)+circle(50,50,6,'#dfaa89');break;
+      case 16: // Orchid — bilateral wing petals and ornate lip
+        head=pet(28,37,18,12,'#dab8d9',-26)+pet(72,37,18,12,'#dab8d9',26)+pet(50,23,15,18,'#dfc0e0')+pet(30,61,17,12,'#c9a3cf',24)+pet(70,61,17,12,'#c9a3cf',-24)+path('M40 47Q50 53 60 47Q66 74 50 83Q34 74 40 47Z','#a873b1','#8d6098')+circle(50,56,5,'#f4d08c');break;
+      case 17: // Gladiolus — vertical series of open funnel flowers
+        stem=path('M50 123Q53 60 48 14','none','#76996a',3);
+        head=repeat(6,i=>{const y=23+i*14,x=50+(i%2?12:-12);return repeat(4,k=>pet(x,y-7,6,10,i%2?'#e7a7b3':'#f1babf',k*90))+circle(x,y,3,'#e9d096');});break;
+      case 18: // Pink rose — overlapping inner spiral and rounded outer petals
+        head=radial(6,15,18,'#e6a7ab',29)+radial(7,11,13,'#f1b7b8',36,13)+path('M43 50Q44 36 55 39Q66 46 55 57Q43 61 44 51Q46 45 54 47','none','#c97f91',3)+circle(50,53,5,'#f0c2b8');break;
+      case 19: // Lavender — purple flowering stalk
+        stem=path('M50 123V24','none','#758c74',3);
+        head=repeat(10,i=>{const y=22+i*6.3,w=5+Math.sin(i/10*Math.PI)*5;return pet(50-w,y,4.8,6.2,'#a392cc',-35)+pet(50+w,y,4.8,6.2,'#9181be',35);});break;
+      case 20: // Iris — upright standards and hanging falls
+        head=pet(50,27,12,26,'#a4a7d4')+pet(31,37,10,20,'#9ba1cf',-35)+pet(69,37,10,20,'#9ba1cf',35)+path('M43 49Q17 44 19 71Q30 93 47 60Z','#778fbe','#7586ab')+path('M57 49Q83 44 81 71Q70 93 53 60Z','#8395c4','#7586ab')+path('M43 47Q50 43 57 47L52 66L48 66Z','#e5c575');break;
+      case 21: // Sweet pea — butterfly wing pairs and curved banner
+        head=pet(31,37,20,17,'#d1a6cb',-28)+pet(67,37,20,17,'#e4b8d6',26)+path('M34 53Q27 30 47 27Q63 23 66 53Q57 70 50 60Q41 70 34 53Z','#e5bbd5','#c79abf')+path('M42 53Q48 57 50 72Q54 56 61 53','none','#ad77ad',3);break;
+      case 22: // Hyacinth — tightly packed tiny star blossoms
+        stem=path('M50 122V31','none','#749570',4);
+        head=repeat(30,i=>{const y=21+Math.floor(i/5)*10,x=28+(i%5)*11;return repeat(5,k=>pet(x,y-3,2.6,4.8,i%2?'#b39bcf':'#c3a9dc',k*72))+circle(x,y,1.7,'#f9ebcf');});break;
+      case 23: // Aster — star of slender lilac rays
+        head=radial(21,4.6,18,'#b9a6d9',28)+circle(50,50,12,'#e8bf65')+circle(47,46,3,'#f9e1a0');break;
+    }
+    // Soft translucent watercolor glazing keeps the illustration warm and light.
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 125" role="img" aria-label="'+name+' — '+meaning+'"><g opacity=".98">'+stem+leaves+head+accent+'</g></svg>';
   }
   // Bumble faithfully follows the round, side-facing yellow-and-black bee reference.
   function bee(){return '<svg viewBox="0 0 160 130" role="img" aria-label="Bumble the bee"><g stroke="#171512" stroke-linecap="round" stroke-linejoin="round"><path d="M64 35 C65 15 85 7 101 19 C113 28 105 46 90 50Z" fill="#d6f0ff" stroke-width="3.5"/><path d="M88 40 C93 13 125 11 136 34 C143 56 117 66 98 51Z" fill="#e0f3ff" stroke-width="3.5"/><path d="M68 18Q80 30 89 21M66 31Q82 40 100 35M85 17Q85 33 102 47M102 18Q104 40 127 41M119 20Q116 35 139 35M101 50Q113 40 125 61" fill="none" stroke-width="2.2"/><path d="M63 51 C81 41 128 45 140 70 C155 104 124 120 91 113 L66 101Z" fill="#302c25" stroke-width="4"/><path d="M86 47Q99 46 107 54Q122 82 110 114L87 113Q94 78 79 49Z" fill="#ffdc59" stroke="none"/><path d="M129 58Q143 71 143 91Q141 102 137 106L128 103Q136 83 121 53Z" fill="#ffdb59" stroke="none"/><path d="M65 48 C37 38 14 50 10 72 C2 103 31 118 57 111 C79 105 93 91 87 67 C84 56 77 50 65 48Z" fill="#ffdb57" stroke-width="4"/><path d="M37 49Q31 32 23 27M61 47Q62 30 54 25" fill="none" stroke-width="4"/><circle cx="23" cy="25" r="6" fill="#ff9c42" stroke="none"/><circle cx="54" cy="23" r="6" fill="#ff9c42" stroke="none"/><circle cx="27" cy="76" r="2.8" fill="#151410" stroke="none"/><circle cx="60" cy="76" r="2.8" fill="#151410" stroke="none"/><path d="M39 78Q44 91 50 79" fill="none" stroke-width="4.5"/><circle cx="22" cy="85" r="5" fill="#f88e70" stroke="none"/><circle cx="67" cy="86" r="5" fill="#f88e70" stroke="none"/></g></svg>';}
