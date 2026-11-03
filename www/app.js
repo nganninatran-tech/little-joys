@@ -750,7 +750,7 @@
         break;
     }
     // Soft translucent watercolor glazing keeps the illustration warm and light.
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 125" role="img" aria-label="'+name+' — '+meaning+'"><g opacity=".98">'+stem+leaves+'<g class="lj-bloom-head">'+head+accent+'</g><g class="lj-bud-mark"><ellipse cx="50" cy="50" rx="8" ry="12" fill="#e6b2af" stroke="#ce8b95" stroke-width="1"/></g></g></svg>';
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 125" role="img" aria-label="'+name+' — '+meaning+'"><g opacity=".98">'+stem+leaves+'<g class="lj-bloom-head">'+head+accent+'<g class="lj-flower-face"><circle cx="50" cy="51" r="10" fill="#ffe1a1" stroke="#915e33" stroke-width="1.7"/><circle cx="46.5" cy="49" r="1.35" fill="#553d2e"/><circle cx="53.5" cy="49" r="1.35" fill="#553d2e"/><path d="M46 53Q50 58 54 53" stroke="#553d2e" stroke-width="1.4" fill="none" stroke-linecap="round"/><circle cx="43.6" cy="53.6" r="1.6" fill="#f29b8b"/><circle cx="56.4" cy="53.6" r="1.6" fill="#f29b8b"/></g></g><g class="lj-bud-mark"><ellipse cx="50" cy="50" rx="8" ry="12" fill="#e6b2af" stroke="#ce8b95" stroke-width="1"/></g></g></svg>';
   }
   // Bumble faithfully follows the round, side-facing yellow-and-black bee reference.
   function bee(){return '<svg viewBox="0 0 160 130" role="img" aria-label="Bumble the bee"><g stroke="#171512" stroke-linecap="round" stroke-linejoin="round"><path d="M64 35 C65 15 85 7 101 19 C113 28 105 46 90 50Z" fill="#d6f0ff" stroke-width="3.5"/><path d="M88 40 C93 13 125 11 136 34 C143 56 117 66 98 51Z" fill="#e0f3ff" stroke-width="3.5"/><path d="M68 18Q80 30 89 21M66 31Q82 40 100 35M85 17Q85 33 102 47M102 18Q104 40 127 41M119 20Q116 35 139 35M101 50Q113 40 125 61" fill="none" stroke-width="2.2"/><path d="M63 51 C81 41 128 45 140 70 C155 104 124 120 91 113 L66 101Z" fill="#302c25" stroke-width="4"/><path d="M86 47Q99 46 107 54Q122 82 110 114L87 113Q94 78 79 49Z" fill="#ffdc59" stroke="none"/><path d="M129 58Q143 71 143 91Q141 102 137 106L128 103Q136 83 121 53Z" fill="#ffdb59" stroke="none"/><path d="M65 48 C37 38 14 50 10 72 C2 103 31 118 57 111 C79 105 93 91 87 67 C84 56 77 50 65 48Z" fill="#ffdb57" stroke-width="4"/><path d="M37 49Q31 32 23 27M61 47Q62 30 54 25" fill="none" stroke-width="4"/><circle cx="23" cy="25" r="6" fill="#ff9c42" stroke="none"/><circle cx="54" cy="23" r="6" fill="#ff9c42" stroke="none"/><circle cx="27" cy="76" r="2.8" fill="#151410" stroke="none"/><circle cx="60" cy="76" r="2.8" fill="#151410" stroke="none"/><path d="M39 78Q44 91 50 79" fill="none" stroke-width="4.5"/><circle cx="22" cy="85" r="5" fill="#f88e70" stroke="none"/><circle cx="67" cy="86" r="5" fill="#f88e70" stroke="none"/></g></svg>';}
@@ -789,29 +789,20 @@
   }
   // A decorative storybook landscape. None of these count as a saved flower.
   function gardenBackdrop(height){
-    const hills=Math.max(360,height),wave=(y,depth,color,opacity=1)=>'<path d="M0 '+y+'Q90 '+(y-depth)+' 180 '+(y-2)+'T360 '+(y-8)+'T600 '+(y-5)+'V'+hills+'H0Z" fill="'+color+'" opacity="'+opacity+'"/>';
-    const grass=[];
-    for(let i=0;i<95;i++){
-      const x=8+(i*137)%588,y=145+(i*83)%Math.max(150,hills-170);
-      const len=7+(i%4)*2;
-      grass.push('<path d="M'+x+' '+y+'q'+((i%2)?-4:4)+' -'+(len*.5)+' '+((i%3)-1)*5+' -'+len+'" fill="none" stroke="#8ca97c" stroke-width="1.5" stroke-linecap="round" opacity=".45"/>');
-    }
-    const tufts=[];
-    for(let i=0;i<Math.ceil(hills/110);i++){
-      const y=169+i*108,x=i%2?547:36;
-      tufts.push('<path d="M'+x+' '+(y+12)+'Q'+(x-17)+' '+(y-16)+' '+(x-23)+' '+(y+9)+'Q'+(x-7)+' '+(y+23)+' '+x+' '+(y+12)+'M'+x+' '+(y+12)+'Q'+(x+17)+' '+(y-18)+' '+(x+23)+' '+(y+9)+'Q'+(x+6)+' '+(y+23)+' '+x+' '+(y+12)+'Z" fill="#9ab887" opacity=".55"/>');
-    }
-    return '<svg class="lj-landscape" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 '+hills+'" preserveAspectRatio="none" aria-hidden="true">'+
-      '<defs><linearGradient id="lj-garden-sky" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#fff0c4"/><stop offset=".26" stop-color="#fff8e8"/><stop offset="1" stop-color="#e8efd8"/></linearGradient><radialGradient id="lj-garden-sun"><stop stop-color="#ffe69b" stop-opacity=".8"/><stop offset="1" stop-color="#ffe69b" stop-opacity="0"/></radialGradient></defs>'+
-      '<rect width="600" height="'+hills+'" fill="url(#lj-garden-sky)"/>'+
-      '<circle cx="492" cy="69" r="108" fill="url(#lj-garden-sun)"/><circle cx="492" cy="69" r="35" fill="#f9d981" opacity=".8"/>'+
-      wave(116,22,'#e8ebd5')+wave(145,18,'#d7e4bf')+
-      wave(204,20,'#c7dab0')+
-      '<path d="M304 '+hills+'Q350 '+(hills*.83)+' 306 '+(hills*.67)+'T309 193" stroke="#f5e9cb" stroke-width="49" fill="none" opacity=".43"/>'+
-      '<path d="M304 '+hills+'Q350 '+(hills*.83)+' 306 '+(hills*.67)+'T309 193" stroke="#decca8" stroke-width="2" fill="none" stroke-dasharray="3 10" opacity=".38"/>'+
-      '<g>'+grass.join('')+tufts.join('')+'</g>'+
-      '<path d="M0 0Q22 52 29 97M-5 37Q23 39 48 68M604 0Q562 41 564 91M600 29Q578 51 548 54" fill="none" stroke="#a7bc91" stroke-width="5" opacity=".46"/>'+
-      '</svg>';
+    // A simple storybook lawn and rounded shrubs. The sky belongs to the
+    // time-of-day/weather layer, and the foreground never obscures flowers.
+    const h=Math.max(360,height);
+    return '<svg class="lj-landscape" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 '+h+'" preserveAspectRatio="none" aria-hidden="true">'+
+      '<g class="lj-garden-bushes" fill="#4a9864" stroke="#31754e" stroke-width="3">'+
+      '<path d="M-12 328Q-18 296 12 292Q22 266 48 282Q64 255 89 281Q112 272 125 303L130 346Z"/>'+
+      '<path d="M466 350Q466 304 490 303Q497 275 526 289Q551 259 577 285Q605 279 615 310V350Z"/>'+
+      '</g>'+
+      '<path class="lj-grass-hill" d="M0 343Q143 291 300 314Q461 284 600 340V'+h+'H0Z" fill="#91c965" stroke="#4c9652" stroke-width="4"/>'+
+      '<g class="lj-garden-tufts" fill="none" stroke="#387e46" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">'+
+      '<path d="M66 361q-7 -15 -13 -7m13 7q0 -23 9 -21m-9 21q13 -14 19 -7"/>'+
+      '<path d="M255 386q-8 -15 -14 -7m14 7q0 -22 9 -20m-9 20q12 -13 18 -6"/>'+
+      '<path d="M490 367q-7 -16 -14 -9m14 9q0 -20 9 -19m-9 19q13 -13 18 -7"/>'+
+      '</g></svg>';
   }
   function scene(entries,start){
     const pos=positions(entries),laughs=entries.filter(x=>x.type==='laugh').length;
@@ -865,15 +856,6 @@
     return '<div class="lj-sky-effects" aria-hidden="true"><span class="lj-sky-orb"></span>'+clouds+
       '<span class="lj-sky-stars">✦ · ✧ · ✦ · ✧ · ✦</span><span class="lj-sky-rain"></span><span class="lj-sky-snow">❄　✳　❅　❄　✧　❅</span></div>';
   }
-  function meadowFoliage(){
-    let html='';
-    for(let i=0;i<48;i++){
-      const x=(i*37.73+11)%99,y=50+(i*23.7)%46,side=i%2?-1:1;
-      const size=.67+(i%5)*.13;
-      html+='<span class="lj-meadow-leaf" style="left:'+x+'%;top:'+y+'%;--leaf-size:'+size+';--leaf-tilt:'+(side*(15+i%4*12))+'deg"></span>';
-    }
-    return '<div class="lj-meadow-foliage" aria-hidden="true">'+html+'</div>';
-  }
   function timelineScene(){
     const monday=weekOf(new Date()),sunday=new Date(monday);sunday.setDate(sunday.getDate()+7);
     const planted=moments.filter(m=>m.type==='joy'&&new Date(m.timestamp)>=monday&&new Date(m.timestamp)<sunday)
@@ -895,7 +877,7 @@
     return '<div class="lj-timeline-shell lj-fixed-garden lj-time-'+time+' lj-weather-'+weather+'">'+
       '<div class="lj-timeline-toolbar"><span>'+labels[time]+'</span><span class="lj-week-label">Bumble gathers the blooms at week’s end</span></div>'+
       '<div class="lj-timeline-viewport" id="lj-timeline-viewport" aria-label="Illustrated '+labels[time].toLowerCase()+' with '+planted.length+' flowers planted this week">'+
-      '<div class="lj-timeline-world"><div class="lj-landscape-wrap">'+gardenBackdrop(410)+'</div>'+gardenSkyDecor()+meadowFoliage()+flowers+
+      '<div class="lj-timeline-world"><div class="lj-landscape-wrap">'+gardenBackdrop(410)+'</div>'+gardenSkyDecor()+flowers+
       (!planted.length?'<div class="lj-timeline-empty">A sunny little space for this week’s first flower.</div>':'')+
       '</div></div><div class="lj-garden-weather-row"><span class="lj-weather-label">'+(gardenWeather.label||'Sky follows your local time')+'</span><button type="button" data-garden-weather title="Use your location for live garden weather">↻ Check my weather</button></div>'+
       '<p class="lj-timeline-help">The sky changes from sunrise to moonlight, and flowers stay planted until Bumble collects this week’s blooms.</p></div>';
