@@ -878,11 +878,66 @@
   }
   function weeks(){const map=new Map(),now=weekOf(new Date());map.set(weekKey(now),now);for(const m of moments){const d=new Date(m.timestamp);if(!Number.isFinite(d.getTime()))continue;const wk=weekOf(d);map.set(weekKey(wk),wk);}const dates=[...map.values()].sort((a,b)=>b-a);return '<section class="lj-weeks"><span class="eyebrow">YOUR GARDEN ALBUM</span><h2>Your weeks in bloom.</h2><p>A different little garden for every week. Each flower is a memory you saved.</p>'+dates.map(start=>{const records=items(start),joys=records.filter(x=>x.type==='joy').length,laughs=records.filter(x=>x.type==='laugh').length;return '<article class="lj-week-card"><span class="eyebrow">YOUR WEEK IN BLOOM</span><h3>'+escapeHtml(label(start))+'</h3>'+scene(records,start)+'<p><b>'+joys+'</b> '+(joys===1?'flower':'flowers')+' · <b>'+laughs+'</b> '+(laughs===1?'laugh':'laughs')+'</p><button type="button" class="lj-save" data-garden-week="'+weekKey(start)+'">Save this week’s garden picture ↗</button></article>';}).join('')+'</section><details class="lj-collection-details"><summary>Explore the Flower Clock — 24 meaningful flowers</summary>'+flowerBook()+'</details>';}
   function settings(){return '<section class="lj-bee-settings"><h2>Meet Bumble</h2><p>Choose how often Bumble shares a gentle message. No pressure, no streaks.</p><div class="lj-tone-options">'+[['chatty','Chatty'],['gentle','Gentle'],['quiet','Quiet']].map(([value,name])=>'<button class="lj-tone '+(tone===value?'chosen':'')+'" data-garden-tone="'+value+'" type="button" aria-pressed="'+(tone===value)+'">'+name+'</button>').join('')+'</div></section>';}
-  function recapSvg(start,entries){const pos=positions(entries),n=pos.length,laughs=entries.filter(m=>m.type==='laugh').length;let floral='';for(const {m,x,y,s} of pos){const xx=40+x*8.8,yy=230+Math.max(25,y)*3.2,scale=.6*s;const stage=growthStage(m,entries),factor=[.07,.42,.72,1][stage],budOpacity=[1,.7,.25,0][stage];
-      const art=flower(m).replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'').replace('<g class="lj-bloom-head">','<g transform="translate(50 54) scale('+factor+') translate(-50 -54)" opacity="'+(stage===0?.07:1)+'">').replace('<g class="lj-bud-mark">','<g opacity="'+budOpacity+'">');
-      floral+='<g transform="translate('+xx.toFixed(0)+' '+yy.toFixed(0)+') scale('+scale.toFixed(2)+') translate(-50 -60)">'+art+'</g>';}const title=escapeHtml(label(start));return '<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640"><rect width="960" height="640" fill="#fff4cc"/><rect x="24" y="24" width="912" height="592" rx="32" fill="#fffaf0" stroke="#dfc794" stroke-width="3"/><text x="480" y="98" font-family="Georgia,serif" font-size="42" text-anchor="middle" fill="#76572f">Your week in bloom</text><text x="480" y="139" font-family="Georgia,serif" font-size="23" text-anchor="middle" fill="#9b7b50">'+title+'</text><circle cx="777" cy="227" r="65" fill="#ffe49a"/><path d="M24 470Q200 370 405 464T936 460V610H24Z" fill="#d2dcb7"/><path d="M24 523Q280 420 510 508T936 497V610H24Z" fill="#b9d09a"/>'+floral+(laughs?'<text x="130" y="240" fill="#d7ae58" font-size="35">✧ ✦ ✧</text>':'')+'<text x="480" y="580" font-family="Georgia,serif" font-size="22" text-anchor="middle" fill="#82643e">'+n+' flowers · '+laughs+' laughs · Little Joys (: </text></svg>';}
-  async function save(key){const start=new Date(key+'T00:00:00');if(!Number.isFinite(start.getTime()))return;let url;try{const blob=new Blob([recapSvg(start,items(start))],{type:'image/svg+xml'});url=URL.createObjectURL(blob);const image=new Image();await new Promise((ok,no)=>{image.onload=ok;image.onerror=no;image.src=url;});const canvas=document.createElement('canvas');canvas.width=960;canvas.height=640;canvas.getContext('2d').drawImage(image,0,0);const png=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!png)throw new Error('Export failed');const downloadUrl=URL.createObjectURL(png),a=document.createElement('a');a.href=downloadUrl;a.download='little-joys-garden-'+key+'.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(downloadUrl),4000);showToast('Your little garden postcard is saved.');}catch(e){showToast('Could not export this picture on this device.');}finally{if(url)URL.revokeObjectURL(url);}}
-  function click(el){if(el.hasAttribute('data-garden')){messageOffset++;render();return true;}if(el.dataset.gardenTone){tone=el.dataset.gardenTone;localStorage.setItem(BEE_KEY,tone);render();return true;}if(el.dataset.gardenWeek){save(el.dataset.gardenWeek);return true;}return false;}
+  function recapSvg(start,entries,kind='week'){
+    const planted=entries.filter(m=>m.type==='joy').sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp));
+    const laughs=entries.filter(m=>m.type==='laugh').length;
+    const count=planted.length,cols=7,rows=Math.max(1,Math.ceil(count/cols));
+    const tileH=Math.min(83,340/rows);
+    let heads='';
+    for(let i=0;i<count;i++){
+      const m=planted[i],col=i%cols,row=Math.floor(i/cols),stage=growthStage(m,entries);
+      const factor=[.10,.42,.72,1][stage],bud=[1,.7,.25,0][stage];
+      const body=flower(m).replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'')
+        .replace('<g class="lj-bloom-head">','<g transform="translate(50 54) scale('+factor+') translate(-50 -54)" opacity="'+(stage===0?.10:1)+'">')
+        .replace('<g class="lj-bud-mark">','<g opacity="'+bud+'">');
+      const x=99+col*111+(row%2?16:0)+(rnd(m.id,'postx')-.5)*13;
+      const y=310+row*tileH+(col%2?10:-8);
+      const size=.69+rnd(m.id,'postscale')*.12;
+      heads+='<g transform="translate('+x+' '+y+') scale('+size+') translate(-50 -70)">'+body+'</g>';
+    }
+    const heading=kind==='daily'?'Bumble’s garden photo':'Your weekly garden keepsake';
+    const date=kind==='daily'?start.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'}):label(start);
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="960" height="690" viewBox="0 0 960 690">'+
+      '<defs><linearGradient id="photoSky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff0ba"/><stop offset="1" stop-color="#fff9e9"/></linearGradient></defs>'+
+      '<rect width="960" height="690" fill="#fff7e1"/><rect x="20" y="20" width="920" height="650" rx="32" fill="url(#photoSky)" stroke="#e6d3a6" stroke-width="3"/>'+
+      '<text x="480" y="89" font-family="Georgia,serif" font-size="41" text-anchor="middle" fill="#765833">'+escapeHtml(heading)+'</text>'+
+      '<text x="480" y="132" font-family="Georgia,serif" font-size="23" text-anchor="middle" fill="#9a7b53">'+escapeHtml(date)+'</text>'+
+      '<circle cx="782" cy="225" r="55" fill="#ffe1a0" opacity=".73"/>'+
+      '<path d="M20 310Q230 250 465 304T940 292V670H20Z" fill="#e2e9c8"/>'+
+      '<path d="M20 397Q240 338 468 375T940 379V670H20Z" fill="#cbdcb2"/>'+
+      '<path d="M20 490Q248 431 483 468T940 476V670H20Z" fill="#afc99b"/>'+
+      '<path d="M445 650Q480 535 466 431" stroke="#f1e6ce" stroke-width="40" opacity=".42" fill="none"/>'+
+      heads+
+      '<rect x="20" y="612" width="920" height="58" fill="#fff6e1" opacity=".9"/>'+
+      '<text x="480" y="647" font-family="Georgia,serif" font-size="22" text-anchor="middle" fill="#7d623d">'+count+' flowers · '+laughs+' laughs · Photo by Bumble</text></svg>';
+  }
+  async function save(key,kind='week'){
+    const start=new Date(key+'T12:00:00');if(!Number.isFinite(start.getTime()))return;
+    let url,downloadUrl;
+    try{
+      let entries;
+      if(kind==='daily'){
+        const through=new Date(start);through.setHours(23,59,59,999);
+        entries=moments.filter(m=>new Date(m.timestamp)<=through);
+      }else entries=items(weekOf(start));
+      const svg=recapSvg(start,entries,kind);
+      url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
+      const picture=new Image();
+      await new Promise((resolve,reject)=>{picture.onload=resolve;picture.onerror=reject;picture.src=url;});
+      const canvas=document.createElement('canvas');canvas.width=960;canvas.height=690;
+      const ctx=canvas.getContext('2d');if(!ctx)throw Error('canvas');
+      ctx.drawImage(picture,0,0);
+      const png=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+      if(!png)throw Error('png');
+      downloadUrl=URL.createObjectURL(png);
+      const link=document.createElement('a');link.href=downloadUrl;
+      link.download='little-joys-'+(kind==='daily'?'daily':'weekly')+'-garden-'+key+'.png';
+      document.body.appendChild(link);link.click();link.remove();
+      showToast('Bumble saved your '+(kind==='daily'?'garden photo!':'weekly keepsake!'));
+    }catch(e){showToast('Could not create your garden picture on this device.');}
+    finally{if(url)URL.revokeObjectURL(url);if(downloadUrl)setTimeout(()=>URL.revokeObjectURL(downloadUrl),4500);}
+  }
+  function click(el){if(el.hasAttribute('data-garden')){messageOffset++;render();return true;}if(el.dataset.gardenTone){tone=el.dataset.gardenTone;localStorage.setItem(BEE_KEY,tone);render();return true;}if(el.dataset.gardenWeek){companion.photograph(()=>save(el.dataset.gardenWeek,'week'));return true;}if(el.dataset.gardenPhoto){const now=new Date(),key=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');companion.photograph(()=>save(key,el.dataset.gardenPhoto==='daily'?'daily':'week'));return true;}return false;}
   function status(scope='week'){
     const entries=scope==='all'?moments:items(weekOf(new Date()));
     const planted=entries.filter(m=>m.type==='joy');
@@ -1041,7 +1096,23 @@
     function settings(){
       return '<section class="lj-companion-settings"><h2>Your little travel buddy</h2><p>Bumble can fly with you around Garden, Memories, Blooms and My Space. Tap Bumble to see where he flies next.</p><button type="button" class="lj-companion-toggle" data-bumble-toggle aria-pressed="'+enabled+'">'+(enabled?'Bumble follows me: On':'Bumble follows me: Off')+'</button></section>';
     }
-    return {ensure,water,followTab,toggle,settings};
+    function photograph(callback){
+      ensure();
+      if(!enabled||busy){callback?.();return;}
+      busy=true;
+      node.classList.add('lj-companion-flying','lj-companion-photographer');
+      say('Smile, little flowers! Say sunshine!');
+      move(Math.max(25,bounds().w-116),Math.max(115,Math.min(bounds().h-210,190)));
+      setTimeout(()=>{
+        node?.classList.add('lj-companion-flash');
+        callback?.();
+        setTimeout(()=>{
+          node?.classList.remove('lj-companion-flying','lj-companion-photographer','lj-companion-flash');
+          busy=false;
+        },650);
+      },calm()?100:1100);
+    }
+    return {ensure,water,photograph,followTab,toggle,settings};
   })();
   function renderToday() {
     const today=todayMoments(),counts=countTypes(today);
@@ -1367,7 +1438,7 @@
     else if(target.dataset.timelineZoom)garden.zoomTimeline(target.dataset.timelineZoom);
     else if(target.hasAttribute('data-timeline-latest'))garden.focusTimeline();
     else if(target.hasAttribute('data-bumble-toggle')){companion.toggle();render();}
-    else if(target.hasAttribute('data-garden')||target.hasAttribute('data-garden-tone')||target.hasAttribute('data-garden-week'))garden.click(target);
+    else if(target.hasAttribute('data-garden')||target.hasAttribute('data-garden-tone')||target.hasAttribute('data-garden-week')||target.hasAttribute('data-garden-photo'))garden.click(target);
     else if(target.hasAttribute('data-sun-another')){sunshineOffset++;render();}
     else if(target.hasAttribute('data-sun-toggle-card')){sunshineSettings.show=!sunshineSettings.show;saveSunshineSettings();render();}
     else if(target.dataset.sunCategory){sunshineSettings.type=target.dataset.sunCategory;sunshineOffset=0;saveSunshineSettings();render();}
