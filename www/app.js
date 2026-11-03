@@ -823,27 +823,82 @@
     }).join('');
     return '<div class="lj-garden-scene'+(laughs?' has-laughs':'')+'" style="height:'+sceneHeight+'px;min-height:'+sceneHeight+'px" role="group" aria-label="'+pos.length+' flowers, one per happy moment"><div class="lj-landscape-wrap">'+gardenBackdrop(sceneHeight)+'</div>'+flowers+(!pos.length?'<p class="lj-empty">A sunny little space for your first flower.<small>No rush to grow.</small></p>':'')+'<span class="lj-water-drops" aria-hidden="true">✧ ✧ ✧</span></div>';
   }
-  // The garden stays in one fixed frame. At the start of each new week,
-  // last week's flowers remain safely preserved in the weekly keepsake album.
+  // Fixed illustrated flower meadow; each moment remains its own accessible bloom.
+  // Sky follows the device's local clock. Live local weather is optional.
+  let gardenWeather={kind:'',label:'',updated:0};
+  let gardenWeatherBusy=false;
+  function gardenTime(){
+    const h=new Date().getHours();
+    return h<5||h>=20?'night':h<8?'sunrise':h<17?'day':'sunset';
+  }
+  function weatherKind(code){
+    if(code>=95)return 'storm';
+    if(code>=71&&code<=86)return 'snow';
+    if(code>=51&&code<=67||code>=80&&code<=82)return 'rain';
+    if(code>=45&&code<=48)return 'fog';
+    if(code>=2&&code<=3)return 'cloud';
+    return 'clear';
+  }
+  async function refreshGardenWeather(force=false){
+    if(gardenWeatherBusy||(!force&&Date.now()-gardenWeather.updated<45*60*1000))return;
+    if(!navigator.geolocation)return;
+    if(!force&&navigator.permissions){
+      try{const p=await navigator.permissions.query({name:'geolocation'});if(p.state!=='granted')return;}
+      catch{return;}
+    }else if(!force)return;
+    gardenWeatherBusy=true;
+    try{
+      const loc=await new Promise((ok,fail)=>navigator.geolocation.getCurrentPosition(ok,fail,{enableHighAccuracy:false,timeout:12000,maximumAge:900000}));
+      const q='https://api.open-meteo.com/v1/forecast?latitude='+encodeURIComponent(loc.coords.latitude.toFixed(3))+'&longitude='+encodeURIComponent(loc.coords.longitude.toFixed(3))+'&current=weather_code,temperature_2m&temperature_unit=fahrenheit&timezone=auto';
+      const response=await fetch(q,{cache:'no-store'});if(!response.ok)throw Error('weather unavailable');
+      const data=await response.json();if(!data.current||typeof data.current.weather_code!=='number')throw Error('missing weather');
+      const kind=weatherKind(data.current.weather_code);
+      const labels={clear:'Clear skies',cloud:'Cloudy',fog:'Misty',rain:'Rainy',storm:'Stormy',snow:'Snowy'};
+      gardenWeather={kind,label:labels[kind]+' · '+Math.round(data.current.temperature_2m)+'°F',updated:Date.now()};
+      if(document.querySelector('.lj-fixed-garden')){document.querySelectorAll('.lj-fixed-garden').forEach(el=>{el.classList.remove('lj-weather-clear','lj-weather-cloud','lj-weather-fog','lj-weather-rain','lj-weather-storm','lj-weather-snow');el.classList.add('lj-weather-'+kind);const label=el.querySelector('.lj-weather-label');if(label)label.textContent=gardenWeather.label;});}
+    }catch(e){if(force&&typeof showToast==='function')showToast(e?.code===1?'Location was not allowed. Your garden still follows the time of day.':'Could not check local weather. Your time-of-day sky still works.');}
+    finally{gardenWeatherBusy=false;}
+  }
+  function gardenSkyDecor(){
+    const sky=gardenTime(),w=gardenWeather.kind;
+    const clouds='<span class="lj-sky-cloud cloud-a"></span><span class="lj-sky-cloud cloud-b"></span>';
+    return '<div class="lj-sky-effects" aria-hidden="true"><span class="lj-sky-orb"></span>'+clouds+
+      '<span class="lj-sky-stars">✦ · ✧ · ✦ · ✧ · ✦</span><span class="lj-sky-rain"></span><span class="lj-sky-snow">❄　✳　❅　❄　✧　❅</span></div>';
+  }
+  function meadowFoliage(){
+    let html='';
+    for(let i=0;i<48;i++){
+      const x=(i*37.73+11)%99,y=50+(i*23.7)%46,side=i%2?-1:1;
+      const size=.67+(i%5)*.13;
+      html+='<span class="lj-meadow-leaf" style="left:'+x+'%;top:'+y+'%;--leaf-size:'+size+';--leaf-tilt:'+(side*(15+i%4*12))+'deg"></span>';
+    }
+    return '<div class="lj-meadow-foliage" aria-hidden="true">'+html+'</div>';
+  }
   function timelineScene(){
     const monday=weekOf(new Date()),sunday=new Date(monday);sunday.setDate(sunday.getDate()+7);
     const planted=moments.filter(m=>m.type==='joy'&&new Date(m.timestamp)>=monday&&new Date(m.timestamp)<sunday)
       .sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp));
     const rows=Math.max(1,Math.ceil(planted.length/7));
+    const cols=Math.min(7,Math.max(1,Math.ceil(planted.length/rows)));
     const flowers=planted.map((m,i)=>{
-      const row=Math.floor(i/7),col=i%7;
-      const x=(col+.5)*100/7+(rnd(m.id,'x')-.5)*2.3;
-      const y=32+(row+.6)*(58/rows)+(col%2?1.5:-1.5);
-      const h=new Date(m.timestamp).getHours(),stage=growthStage(m,moments),sp=FLOWER_CLOCK[h];
-      const size=Math.min(.93,Math.max(.49,1.02-rows*.085));
-      return '<button type="button" class="lj-flower lj-stage-'+stage+'" data-edit="'+escapeHtml(m.id)+'" style="left:'+x+'%;top:'+y+'%;--flower-size:'+size+';--flower-rotate:'+((rnd(m.id,'twist')-.5)*10)+'deg;z-index:'+(10+row)+'" title="'+escapeHtml(sp[0]+' · '+new Date(m.timestamp).toLocaleDateString())+'" aria-label="'+escapeHtml('Open '+sp[0]+' memory, '+new Date(m.timestamp).toLocaleString())+'">'+flower(m)+'</button>';
+      const row=Math.floor(i/cols),col=i%cols;
+      // Staggered, layered flower bed rather than a rigid row of identical daisies.
+      const x=(col+.47+(row%2)*.23)*100/cols+(rnd(m.id,'x')-.5)*4;
+      const baseY=53+row*(39/rows);
+      const y=baseY+(rnd(m.id,'y')-.5)*7+(col%2?1.6:-1.4);
+      const h=new Date(m.timestamp).getHours(),sp=FLOWER_CLOCK[h],stage=growthStage(m,moments);
+      const size=Math.max(.70,Math.min(1.28,1.13-rows*.045+(rnd(m.id,'scale')-.5)*.24));
+      return '<button type="button" class="lj-flower lj-stage-'+stage+'" data-edit="'+escapeHtml(m.id)+'" style="left:'+Math.max(5,Math.min(95,x))+'%;top:'+y+'%;--flower-size:'+size+';--flower-rotate:'+((rnd(m.id,'twist')-.5)*17)+'deg;z-index:'+(20+row*3+(i%3))+'" title="'+escapeHtml(sp[0]+' · '+new Date(m.timestamp).toLocaleDateString())+'" aria-label="'+escapeHtml('Open '+sp[0]+' memory, '+new Date(m.timestamp).toLocaleString())+'">'+flower(m)+'</button>';
     }).join('');
-    return '<div class="lj-timeline-shell lj-fixed-garden">'+
-      '<div class="lj-timeline-toolbar"><span>This week’s little garden</span><span class="lj-week-label">Bumble gathers the blooms at week’s end</span></div>'+
-      '<div class="lj-timeline-viewport" id="lj-timeline-viewport" aria-label="Fixed garden with '+planted.length+' flowers planted this week">'+
-      '<div class="lj-timeline-world"><div class="lj-landscape-wrap">'+gardenBackdrop(410)+'</div>'+flowers+
+    const time=gardenTime(),weather=gardenWeather.kind||'unknown';
+    const labels={night:'Moonlit garden',sunrise:'Morning glow',day:'Daytime garden',sunset:'Golden evening'};
+    return '<div class="lj-timeline-shell lj-fixed-garden lj-time-'+time+' lj-weather-'+weather+'">'+
+      '<div class="lj-timeline-toolbar"><span>'+labels[time]+'</span><span class="lj-week-label">Bumble gathers the blooms at week’s end</span></div>'+
+      '<div class="lj-timeline-viewport" id="lj-timeline-viewport" aria-label="Illustrated '+labels[time].toLowerCase()+' with '+planted.length+' flowers planted this week">'+
+      '<div class="lj-timeline-world"><div class="lj-landscape-wrap">'+gardenBackdrop(410)+'</div>'+gardenSkyDecor()+meadowFoliage()+flowers+
       (!planted.length?'<div class="lj-timeline-empty">A sunny little space for this week’s first flower.</div>':'')+
-      '</div></div><p class="lj-timeline-help">Your flowers stay right here all week. Bumble gathers them into your weekly keepsake, so every little joy is remembered.</p></div>';
+      '</div></div><div class="lj-garden-weather-row"><span class="lj-weather-label">'+(gardenWeather.label||'Sky follows your local time')+'</span><button type="button" data-garden-weather title="Use your location for live garden weather">↻ Check my weather</button></div>'+
+      '<p class="lj-timeline-help">The sky changes from sunrise to moonlight, and flowers stay planted until Bumble collects this week’s blooms.</p></div>';
   }
   function focusTimeline(){ /* The garden is a fixed frame; nothing to pan. */ }
   function zoomTimeline(){ /* No zoom: flowers stay planted in their places. */ }
@@ -943,7 +998,7 @@
     }
     return {scope,flowers:planted.length,laughs:laughed.length,stages,varieties:[...varieties.entries()].sort((a,b)=>b[1]-a[1]),hours};
   }
-  return {home,weeks,settings,click,celebrateLaugh,bee,status,focusTimeline,zoomTimeline};
+  return {home,weeks,settings,click,celebrateLaugh,bee,status,focusTimeline,zoomTimeline,refreshGardenWeather};
 })();
   // Bumble is a lightweight, on-screen companion. It never changes saved journal data.
   const companion=(function(){
@@ -1302,6 +1357,7 @@
     hydratePhotos(content);
     companion.ensure();
     if(currentTab==='today')garden.focusTimeline();
+    if(currentTab==='today')garden.refreshGardenWeather();
     document.querySelectorAll('[data-tab]').forEach(button=>{
       const active=button.dataset.tab===currentTab;button.classList.toggle('active',active);
       if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
@@ -1420,6 +1476,7 @@
     if(target.dataset.add)pulseMomentTrigger(target,target.dataset.add);
     else if(target.dataset.goto)navigate(target.dataset.goto);
     else if(target.dataset.bumblePrompt)bumbleChat.send(target.dataset.bumblePrompt);
+    else if(target.hasAttribute('data-garden-weather'))garden.refreshGardenWeather(true);
     else if(target.dataset.timelineZoom)garden.zoomTimeline(target.dataset.timelineZoom);
     else if(target.hasAttribute('data-timeline-latest'))garden.focusTimeline();
     else if(target.hasAttribute('data-bumble-toggle')){companion.toggle();render();}
