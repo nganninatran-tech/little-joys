@@ -736,3 +736,43 @@ body{background:radial-gradient(circle at 13% 15%,#fff0b4 0,transparent 32%),rad
 .lj-fixed-garden .lj-week-label{font-size:10px;font-weight:500;color:#9a8060;text-align:right}
 .lj-fixed-garden .lj-timeline-empty{top:46%;left:50%;width:min(80%,310px);transform:translate(-50%,-50%);font-size:15px}
 @media(max-width:420px){.lj-fixed-garden .lj-timeline-viewport{height:365px;max-height:none}.lj-fixed-garden .lj-week-label{font-size:9px}.lj-fixed-garden .lj-timeline-world .lj-flower{width:44px;height:60px}}
+
+/* Illustrated meadow: bold painterly blossoms, layered leafy border, living sky. */
+.lj-fixed-garden .lj-timeline-viewport{height:430px;max-height:none;border:0;overflow:hidden}
+.lj-fixed-garden .lj-timeline-world{isolation:isolate;background:#f8edc8}
+.lj-fixed-garden .lj-landscape-wrap{position:absolute;inset:0;z-index:0}
+.lj-fixed-garden .lj-landscape{opacity:.84}
+.lj-fixed-garden .lj-timeline-world .lj-flower{width:clamp(64px,14vw,104px);height:clamp(86px,20vw,138px);filter:drop-shadow(0 4px 2px #466a3830);transition:filter .2s ease}
+.lj-fixed-garden .lj-flower .lj-bloom-head{transform:scale(1)!important;opacity:1!important}
+.lj-fixed-garden .lj-flower .lj-bud-mark{opacity:0!important;transform:scale(0)!important}
+.lj-fixed-garden .lj-flower svg{overflow:visible}
+.lj-fixed-garden .lj-flower:hover,.lj-fixed-garden .lj-flower:focus-visible{z-index:85!important;filter:drop-shadow(0 4px 5px #4c784966) brightness(1.06)}
+.lj-fixed-garden .lj-timeline-toolbar{background:#fff9e9}
+.lj-fixed-garden .lj-meadow-foliage{position:absolute;inset:0;pointer-events:none;z-index:2}
+.lj-fixed-garden .lj-meadow-leaf{position:absolute;width:28px;height:56px;transform:rotate(var(--leaf-tilt)) scale(var(--leaf-size));transform-origin:bottom;opacity:.86}
+.lj-fixed-garden .lj-meadow-leaf:before{content:"";position:absolute;left:13px;bottom:0;width:3px;height:52px;border-radius:4px;background:#42865e}
+.lj-fixed-garden .lj-meadow-leaf:after{content:"";position:absolute;left:0;bottom:16px;width:21px;height:29px;background:#5ba46d;border-radius:100% 0 100% 0;transform:rotate(-30deg);box-shadow:17px -16px 0 -1px #7eaf69}
+.lj-fixed-garden .lj-sky-effects{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.lj-fixed-garden .lj-sky-orb{position:absolute;top:8%;right:16%;width:62px;height:62px;border-radius:50%;background:#ffe38c;box-shadow:0 0 45px 10px #ffde9290;transition:background 1s}
+.lj-fixed-garden .lj-sky-cloud{position:absolute;top:16%;left:8%;width:94px;height:25px;border-radius:100px;background:#fffefaaf;filter:blur(1px);box-shadow:24px -13px 0 4px #fffefa8f,54px -6px 0 0 #fffefa9e;opacity:.65}
+.lj-fixed-garden .lj-sky-cloud.cloud-b{left:68%;top:28%;transform:scale(.7)}
+.lj-fixed-garden .lj-sky-stars{display:none;position:absolute;inset:6% 10% auto;letter-spacing:20px;line-height:3;color:#fff8d5;font-size:20px;text-shadow:0 0 8px #ffe8a0}
+.lj-fixed-garden .lj-sky-rain,.lj-fixed-garden .lj-sky-snow{display:none;position:absolute;inset:0;pointer-events:none}
+.lj-fixed-garden.lj-time-sunrise .lj-timeline-world{background:linear-gradient(#ffd2ac 0%,#ffe7b4 44%,#c0d69a 100%)}
+.lj-fixed-garden.lj-time-sunset .lj-timeline-world{background:linear-gradient(#f1b7b1 0%,#f9c594 46%,#b2bd89 100%)}
+.lj-fixed-garden.lj-time-night .lj-timeline-world{background:linear-gradient(#182344,#37436c 48%,#344e53 100%)}
+.lj-fixed-garden.lj-time-night .lj-landscape{opacity:.42;filter:brightness(.48) saturate(.8)}
+.lj-fixed-garden.lj-time-night .lj-sky-orb{background:#f5efcf;box-shadow:0 0 25px 7px #faf5cd4d;width:48px;height:48px}
+.lj-fixed-garden.lj-time-night .lj-sky-stars{display:block}
+.lj-fixed-garden.lj-time-night .lj-sky-cloud{opacity:.15}
+.lj-fixed-garden.lj-time-night .lj-meadow-leaf{filter:brightness(.65)}
+.lj-fixed-garden.lj-time-night .lj-flower{filter:brightness(.78) drop-shadow(0 4px 4px #07182355)}
+.lj-fixed-garden.lj-time-night .lj-timeline-empty{background:#293653cc;color:#fff5d8}
+.lj-fixed-garden.lj-weather-cloud .lj-sky-cloud,.lj-fixed-garden.lj-weather-rain .lj-sky-cloud,.lj-fixed-garden.lj-weather-storm .lj-sky-cloud{opacity:1;filter:grayscale(.35)}
+.lj-fixed-garden.lj-weather-fog .lj-sky-effects:after{content:"";position:absolute;inset:5% 0 33%;background:linear-gradient(#ffffff88,#ffffff12);filter:blur(11px)}
+.lj-fixed-garden.lj-weather-rain .lj-sky-rain,.lj-fixed-garden.lj-weather-storm .lj-sky-rain{display:block;background:repeating-linear-gradient(110deg,transparent 0 21px,#afcce777 22px 23px,transparent 24px 48px);opacity:.53;mask-image:linear-gradient(#000 5%,transparent 85%)}
+.lj-fixed-garden.lj-weather-storm .lj-sky-effects:after{content:"";position:absolute;inset:0;background:#343c6270}
+.lj-fixed-garden.lj-weather-snow .lj-sky-snow{display:block;white-space:pre-wrap;line-height:65px;letter-spacing:26px;font-size:21px;color:#fff;opacity:.85;text-shadow:0 0 4px #fff}
+.lj-garden-weather-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 12px;background:#fff9ec;color:#806844;font-size:11px}
+.lj-garden-weather-row button{flex-shrink:0;background:#ffedbe;border:1px solid #e3ca8e;border-radius:12px;padding:7px 10px;color:#735835;font-size:11px;font-weight:650;cursor:pointer}
+@media(max-width:420px){.lj-fixed-garden .lj-timeline-viewport{height:400px;max-height:none}.lj-fixed-garden .lj-timeline-world .lj-flower{width:69px;height:96px}.lj-fixed-garden .lj-week-label{font-size:9px}.lj-fixed-garden .lj-sky-orb{width:48px;height:48px}}
