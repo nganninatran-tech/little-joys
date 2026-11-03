@@ -553,3 +553,27 @@ body{background:radial-gradient(circle at 13% 15%,#fff0b4 0,transparent 32%),rad
 .lj-book-illustration .lj-bud-mark{opacity:0}
 .lj-book-illustration .lj-bloom-head{transform:scale(1);opacity:1}
 @media(max-width:420px){.lj-garden-scene{height:285px;min-height:285px}.lj-garden-head{align-items:flex-start}.lj-garden-head h2{font-size:22px}}
+
+/* Bumble accompanies every screen instead of being fixed inside Garden. */
+.lj-companion{position:fixed;z-index:48;width:66px;height:61px;left:calc(100vw - 83px);top:50%;pointer-events:none;transition:left 1.05s cubic-bezier(.24,.76,.22,1),top 1.05s cubic-bezier(.24,.76,.22,1);filter:drop-shadow(0 5px 9px rgba(129,106,63,.16))}
+.lj-companion[hidden]{display:none!important}
+.lj-companion-instant{transition:none!important}
+.lj-companion-tap{width:100%;height:100%;background:transparent;border:0;padding:0;cursor:pointer;pointer-events:auto;position:relative;z-index:2;touch-action:manipulation}
+.lj-companion-tap svg{display:block;width:100%;height:100%;animation:lj-bee-hover 2.7s ease-in-out infinite}
+.lj-companion-tap:focus-visible{outline:3px solid #bd9155;outline-offset:4px;border-radius:45%}
+.lj-companion-flying .lj-companion-tap svg{animation:lj-bee-hover .42s ease-in-out infinite}
+.lj-companion-can{position:absolute;left:-9px;top:29px;width:36px;height:36px;transform:rotate(-6deg);z-index:3;opacity:0;pointer-events:none;transition:opacity .25s,transform .35s}
+.lj-companion-can svg{width:100%;height:100%}
+.lj-companion-watering .lj-companion-can{opacity:1}
+.lj-companion-pouring .lj-companion-can{transform:rotate(54deg) translate(4px,0)}
+.lj-companion-bubble{position:absolute;bottom:calc(100% + 7px);right:0;background:#fffcef;border:1px solid #ebd59f;border-radius:15px 15px 3px 15px;padding:9px 11px;min-width:125px;max-width:195px;box-shadow:0 5px 20px rgba(147,117,62,.16);font:600 11px/1.4 system-ui,sans-serif;color:#7d6138;opacity:0;transform:translateY(5px);transition:opacity .2s,transform .2s;pointer-events:none}
+.lj-companion-talking .lj-companion-bubble{opacity:1;transform:translateY(0)}
+.lj-companion-splash{position:absolute;left:-28px;top:49px;width:76px;font-size:22px;opacity:0;pointer-events:none}
+.lj-companion-pouring .lj-companion-splash{animation:lj-bee-sprinkle .9s ease-out both}
+.lj-companion-settings{margin:14px 0;padding:18px;background:#fff8e1;border:1px solid #ebd8ab;border-radius:19px}
+.lj-companion-settings h2{font:normal 24px/1.2 Georgia,serif;color:#775a31;margin:0 0 6px}
+.lj-companion-settings p{font-size:12px;line-height:1.55;color:#94774a;margin:4px 0 12px}
+.lj-companion-toggle{border:1px solid #e2c787;border-radius:99px;background:#ffe7a5;color:#74542a;padding:10px 14px;font-weight:700;font-size:12px;cursor:pointer}
+@keyframes lj-bee-hover{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-5px) rotate(3deg)}}
+@keyframes lj-bee-sprinkle{0%{opacity:0;transform:translateY(-9px)}24%{opacity:1}85%{opacity:1}100%{opacity:0;transform:translateY(40px)}}
+@media(prefers-reduced-motion:reduce){.lj-companion,.lj-companion-bubble,.lj-companion-can{transition:none!important}.lj-companion-tap svg,.lj-companion-splash{animation:none!important}}
