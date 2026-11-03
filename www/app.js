@@ -1249,14 +1249,14 @@
         /water|thirst|dry|sogg|wet|wilt/.test(question)?'water':
         /soil|drain|compost|fertili|feed|ph\b/.test(question)?'soil':
         /when.*(bloom|flower)|bloom.*when|season|month/.test(question)?'season':
-        /not bloom|won.t bloom|won t bloom|wont bloom|no flower|yellow|brown|dying|wilt|pest|diseas|problem/.test(question)?'trouble':
+        /not bloom|won.t bloom|won t.*bloom|wont.*bloom|no flower|yellow|brown|dying|wilt|pest|diseas|problem/.test(question)?'trouble':
         /prun|trim|cut|deadhead|propagat|seed|sow|plant|pot|container|winter|frost/.test(question)?'tip':
         /meaning|symbol|represent/.test(question)?'meaning':'overview';
       let flower=explicit;
       if(!flower&&/another|random|surprise|flower fact|tell me about a flower/.test(input)){
         flower=flowerCare[Math.floor(Math.random()*flowerCare.length)][0];
       }
-      if(!flower&&lastCareFlower&&/^(how|what|when|why|where|can|should|is|are|does|do|and|more about|tell me more)\\b/.test(input)&&!/(grow|plant|care for) [a-z]+/.test(input))flower=lastCareFlower;
+      if(!flower&&lastCareFlower&&/^(how |what |when |why |where |can |should |is |are |does |do |and |more about|tell me more)/.test(input)&&!/(grow|plant|care for) [a-z]+/.test(input))flower=lastCareFlower;
       if(!flower){
         for(let i=messages.length-2;i>=0;i--){if(messages[i].who==='you'){flower=namedFlower(messages[i].text);if(flower)break;}}
       }
