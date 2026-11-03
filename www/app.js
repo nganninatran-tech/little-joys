@@ -837,7 +837,27 @@
       floral+='<g transform="translate('+xx.toFixed(0)+' '+yy.toFixed(0)+') scale('+scale.toFixed(2)+') translate(-50 -60)">'+art+'</g>';}const title=escapeHtml(label(start));return '<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640"><rect width="960" height="640" fill="#fff4cc"/><rect x="24" y="24" width="912" height="592" rx="32" fill="#fffaf0" stroke="#dfc794" stroke-width="3"/><text x="480" y="98" font-family="Georgia,serif" font-size="42" text-anchor="middle" fill="#76572f">Your week in bloom</text><text x="480" y="139" font-family="Georgia,serif" font-size="23" text-anchor="middle" fill="#9b7b50">'+title+'</text><circle cx="777" cy="227" r="65" fill="#ffe49a"/><path d="M24 470Q200 370 405 464T936 460V610H24Z" fill="#d2dcb7"/><path d="M24 523Q280 420 510 508T936 497V610H24Z" fill="#b9d09a"/>'+floral+(laughs?'<text x="130" y="240" fill="#d7ae58" font-size="35">✧ ✦ ✧</text>':'')+'<text x="480" y="580" font-family="Georgia,serif" font-size="22" text-anchor="middle" fill="#82643e">'+n+' flowers · '+laughs+' laughs · Little Joys (: </text></svg>';}
   async function save(key){const start=new Date(key+'T00:00:00');if(!Number.isFinite(start.getTime()))return;let url;try{const blob=new Blob([recapSvg(start,items(start))],{type:'image/svg+xml'});url=URL.createObjectURL(blob);const image=new Image();await new Promise((ok,no)=>{image.onload=ok;image.onerror=no;image.src=url;});const canvas=document.createElement('canvas');canvas.width=960;canvas.height=640;canvas.getContext('2d').drawImage(image,0,0);const png=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!png)throw new Error('Export failed');const downloadUrl=URL.createObjectURL(png),a=document.createElement('a');a.href=downloadUrl;a.download='little-joys-garden-'+key+'.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(downloadUrl),4000);showToast('Your little garden postcard is saved.');}catch(e){showToast('Could not export this picture on this device.');}finally{if(url)URL.revokeObjectURL(url);}}
   function click(el){if(el.hasAttribute('data-garden')){messageOffset++;render();return true;}if(el.dataset.gardenTone){tone=el.dataset.gardenTone;localStorage.setItem(BEE_KEY,tone);render();return true;}if(el.dataset.gardenWeek){save(el.dataset.gardenWeek);return true;}return false;}
-  return {home,weeks,settings,click,celebrateLaugh,bee};
+  function status(scope='week'){
+    const entries=scope==='all'?moments:items(weekOf(new Date()));
+    const planted=entries.filter(m=>m.type==='joy');
+    const laughed=entries.filter(m=>m.type==='laugh');
+    const stages=[0,0,0,0];
+    const varieties=new Map();
+    for(const m of planted){
+      const h=new Date(m.timestamp).getHours();
+      if(!Number.isInteger(h)||h<0||h>23)continue;
+      const name=FLOWER_CLOCK[h][0];
+      varieties.set(name,(varieties.get(name)||0)+1);
+      stages[growthStage(m,entries)]++;
+    }
+    const hours={joy:Array(24).fill(0),laugh:Array(24).fill(0)};
+    for(const m of entries){
+      const h=new Date(m.timestamp).getHours();
+      if((m.type==='joy'||m.type==='laugh')&&Number.isInteger(h)&&h>=0&&h<24)hours[m.type][h]++;
+    }
+    return {scope,flowers:planted.length,laughs:laughed.length,stages,varieties:[...varieties.entries()].sort((a,b)=>b[1]-a[1]),hours};
+  }
+  return {home,weeks,settings,click,celebrateLaugh,bee,status};
 })();
   // Bumble is a lightweight, on-screen companion. It never changes saved journal data.
   const companion=(function(){
@@ -1056,7 +1076,7 @@
     function add(who,text){messages.push({who,text:String(text).slice(0,700)});messages=messages.slice(-30);save();}
     function history(){return messages.map(m=>'<div class="lj-chat-message '+(m.who==='you'?'mine':'theirs')+'"><span class="lj-chat-speaker">'+(m.who==='you'?'You':'Bumble 🐝')+'</span><p>'+escapeHtml(m.text)+'</p></div>').join('');}
     function render(){
-      return '<section class="lj-chat"><span class="eyebrow">YOUR BUZZY LITTLE FRIEND</span><h1 class="page-title">Chat with Bumble.</h1><p class="page-description">He loves flowers, silly jokes, and watching the weather. This version has helpful built-in replies, not open-ended AI conversations.</p><div class="lj-chat-profile"><div class="lj-chat-profile-bee">'+garden.bee()+'</div><div><strong>Bumble the garden buddy</strong><small>Flower expert · Joke expert · Weather helper</small></div></div><div class="lj-chat-messages" id="lj-chat-messages" aria-live="polite">'+history()+'</div><div class="lj-chat-prompts"><button type="button" data-bumble-prompt="Tell me a joke">Tell me a joke</button><button type="button" data-bumble-prompt="Tell me about a flower">Flower facts</button><button type="button" data-bumble-prompt="What’s the weather?">Weather</button></div><form class="lj-chat-form" id="lj-chat-form"><label class="sr-only" for="lj-chat-input">Message Bumble</label><input id="lj-chat-input" maxlength="300" autocomplete="off" placeholder="Ask Bumble something..." required><button class="lj-chat-send" type="submit" aria-label="Send message">'+icon('arrow',20)+'</button></form><p class="lj-chat-note">Weather uses your approximate device location only after you allow it. Your chat stays in this browser.</p></section>';
+      return '<section class="lj-chat"><span class="eyebrow">YOUR BUZZY LITTLE FRIEND</span><h1 class="page-title">Chat with Bumble.</h1><p class="page-description">He loves flowers, silly jokes, weather, and checking how your garden is growing. This version has helpful built-in replies, not open-ended AI conversations.</p><div class="lj-chat-profile"><div class="lj-chat-profile-bee">'+garden.bee()+'</div><div><strong>Bumble the garden buddy</strong><small>Flower expert · Jokes · Weather · Garden status</small></div></div><div class="lj-chat-messages" id="lj-chat-messages" aria-live="polite">'+history()+'</div><div class="lj-chat-prompts"><button type="button" data-bumble-prompt="Tell me a joke">Tell me a joke</button><button type="button" data-bumble-prompt="Tell me about a flower">Flower facts</button><button type="button" data-bumble-prompt="What’s the weather?">Weather</button><button type="button" data-bumble-prompt="How is my garden doing?">Garden status</button><button type="button" data-bumble-prompt="What hour am I happiest?">Happy hours</button><button type="button" data-bumble-prompt="When did I laugh the most?">Laugh hours</button></div><form class="lj-chat-form" id="lj-chat-form"><label class="sr-only" for="lj-chat-input">Message Bumble</label><input id="lj-chat-input" maxlength="300" autocomplete="off" placeholder="Ask Bumble something..." required><button class="lj-chat-send" type="submit" aria-label="Send message">'+icon('arrow',20)+'</button></form><p class="lj-chat-note">Weather uses your approximate device location only after you allow it. Your chat stays in this browser.</p></section>';
     }
     function refresh(){
       const area=document.querySelector('#lj-chat-messages');
@@ -1083,11 +1103,47 @@
         add('bumble',err&&err.code===1?'No worries! You didn’t allow location access, so I won’t check your weather.':'Oh honey! I couldn’t reach the live weather right now. Try again when you have a connection.');
       }finally{weatherBusy=false;refresh();}
     }
+    function hourText(hour){
+      return String(hour%12||12)+(hour<12?' AM':' PM');
+    }
+    function busiestHours(counts,type){
+      const peak=Math.max(...counts);
+      if(!peak)return 'No '+type+' moments have been recorded during this period yet.';
+      const winners=counts.map((count,h)=>({count,h})).filter(x=>x.count===peak);
+      const shown=winners.slice(0,4).map(x=>hourText(x.h)).join(', ');
+      return 'The most '+type+' moments you recorded were at '+shown+(winners.length>4?' and '+(winners.length-4)+' other hours':'')+' ('+peak+' '+(peak===1?'moment':'moments')+' at each of those hours).';
+    }
+    function gardenReport(input){
+      const all=/all.time|ever|overall|total|entire|since i started|whole history|lifetime/.test(input);
+      const stats=garden.status(all?'all':'week');
+      const scope=all?'across all your saved moments':'in this week’s garden';
+      const hourScope=all?'across all your saved moments':'this week';
+      if(/hour|time of day|when do i|when am i|when have i|most happy|happiest|laugh.*most|most.*laugh/.test(input)){
+        if(/laugh|giggl|funny/.test(input)&&!/happy|joy/.test(input))
+          return 'Buzz! Looking at the times of your saved laughs '+hourScope+': '+busiestHours(stats.hours.laugh,'laugh')+' Those are logging times, not a measure of your actual happiness.';
+        if(/happy|joy|happiest/.test(input)&&!/laugh/.test(input))
+          return 'Buzz! Looking at the times of your saved happy moments '+hourScope+': '+busiestHours(stats.hours.joy,'happy')+' Those are the moments you logged, not necessarily when you felt happiest.';
+        return 'Here’s when you logged the most moments '+hourScope+'. Happy: '+busiestHours(stats.hours.joy,'happy')+' Laughs: '+busiestHours(stats.hours.laugh,'laugh');
+      }
+      if(/what flowers|which flowers|flower types|variet|species|flower list/.test(input)){
+        if(!stats.varieties.length)return 'Your garden has no planted flowers '+scope+' yet. Try tapping “I felt happy” to plant a bud!';
+        return 'Buzz! These are the flowers '+scope+': '+stats.varieties.map(([name,count])=>name+' ×'+count).join(', ')+'. Each flower represents one saved happy moment.';
+      }
+      if(/grow|bloom|bud|water|need.*laugh|stage/.test(input)){
+        if(!stats.flowers)return 'There are no flowers to water '+scope+' yet. Save a happy moment to plant your first bud!';
+        return 'Your flower growth '+scope+': '+stats.stages[0]+' buds, '+stats.stages[1]+' beginning to open, '+stats.stages[2]+' nearly bloomed, and '+stats.stages[3]+' fully blooming. Each laugh after a flower is planted helps it grow by one stage, up to three.';
+      }
+      const varieties=stats.varieties.length?stats.varieties.slice(0,5).map(([name,count])=>count+' '+name+(count===1?'':'s')).join(', '):'none planted yet';
+      return 'Garden check! '+scope.charAt(0).toUpperCase()+scope.slice(1)+': '+stats.flowers+' '+(stats.flowers===1?'flower':'flowers')+' and '+stats.laughs+' '+(stats.laughs===1?'laugh':'laughs')+'. Your flowers include '+varieties+'. '+stats.stages[3]+' fully blooming; '+(stats.stages[0]+stats.stages[1]+stats.stages[2])+' still growing. Want to know which flowers you have or which hours you log the most joy and laughter?';
+    }
     async function send(text){
       text=String(text||'').trim().slice(0,300);if(!text)return;
       add('you',text);
       const input=text.toLowerCase();
       if(/weather|temperature|forecast|outside|rain today|sunny today/.test(input)){refresh();await weather();return;}
+      if(/garden status|garden doing|how is my garden|my garden|my flowers|flowers do i have|what flowers|which flowers|flower types|flower list|varieties|species|still growing|fully bloom|watered|flower growth|growth stage|grow my flowers|when did i laugh|laugh.*most|most.*laugh|when am i happy|when am i happiest|what hour|which hour|happy hours|laugh hours|happiest hour|time of day|happiness pattern/.test(input)){
+        add('bumble',gardenReport(input));refresh();return;
+      }
       let answer='';
       if(/joke|funny|laugh|giggle|make me smile/.test(input)){answer=jokes[jokeIndex++%jokes.length];}
       else if(/flower|bloom|plant|petal|garden|rose|daisy|lavender|tulip|sunflower|orchid|iris|peony|daffodil|hyacinth|pansy|violet|crocus|aster/.test(input)){
@@ -1097,10 +1153,10 @@
           const h=new Date().getHours(),f=flowerFacts[h];
           answer='My flower for this hour is '+f[0]+'! It often represents '+f[1]+'. '+f[2]+' Ask me about another flower by name!';
         }
-      }else if(/hello|hey|hi|buzz|bumble/.test(input))answer='Buzz buzz! I’m here! Want a flower fact, a silly joke, or a weather check?';
+      }else if(/hello|hey|hi|buzz|bumble/.test(input))answer='Buzz buzz! I’m here! Want a flower fact, a joke, a weather check, or your garden status?';
       else if(/thank/.test(input))answer='You’re so welcome! Sending you a tiny golden sunshine hug.';
       else if(/sad|tired|stress|hard day|down/.test(input))answer='I’m sorry it’s been a rough day. We don’t need to turn every feeling into a flower. Want a gentle flower fact or a silly joke?';
-      else answer='Buzz! I’m still learning. I know lots about my 24 flowers, I can tell silly jokes, and I can check local weather with your permission. Try one of those!';
+      else answer='Buzz! I’m still learning. I know my 24 flowers, silly jokes, live weather with permission, and your garden status—including when you’ve logged the most happy moments and laughs. Try asking!';
       add('bumble',answer);refresh();
     }
     function clear(){messages=[{who:'bumble',text:'Fresh little page! Want a flower fact, joke, or weather check?'}];save();refresh();}
