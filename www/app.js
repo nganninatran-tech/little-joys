@@ -735,14 +735,42 @@
     const sayings=['Buzz! I’m right here.','Want to explore together?','A little sunshine follows you.','I love your little moments.','Where should we fly next?','Your garden is looking lovely.'];
     const calm=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)').matches===true;
     const bounds=()=>({w:window.innerWidth||375,h:window.innerHeight||700});
+    let flyingAnimation=null;
     function move(left,top,fast=false){
       if(!node)return;
       const {w,h}=bounds(),size=62;
-      const x=Math.max(9,Math.min(w-size-9,left));
-      const y=Math.max(84,Math.min(h-size-108,top));
-      if(fast||calm())node.classList.add('lj-companion-instant');
-      node.style.left=x+'px';node.style.top=y+'px';
-      if(fast||calm())requestAnimationFrame(()=>node?.classList.remove('lj-companion-instant'));
+      const x=Math.max(10,Math.min(w-size-10,left));
+      const y=Math.max(82,Math.min(h-size-107,top));
+      if(flyingAnimation){
+        const old=node.getBoundingClientRect();
+        flyingAnimation.cancel();flyingAnimation=null;
+        node.style.left=old.left+'px';node.style.top=old.top+'px';
+      }
+      if(fast||calm()||typeof node.animate!=='function'){
+        node.style.left=x+'px';node.style.top=y+'px';return;
+      }
+      const from=node.getBoundingClientRect();
+      const dx=x-from.left,dy=y-from.top;
+      const d=Math.hypot(dx,dy);
+      if(d<12){node.style.left=x+'px';node.style.top=y+'px';return;}
+      // Bumble rises, arcs through a gentle curved path, and settles at his destination.
+      // Animate the composited transform rather than interpolating left/top.
+      const lift=Math.min(78,Math.max(25,d*.20));
+      const sway=dx>0?-Math.min(26,d*.12):Math.min(26,d*.12);
+      const duration=Math.min(1850,Math.max(700,d*3.0));
+      const keyframes=[
+        {transform:'translate(0px,0px) rotate(0deg)',offset:0},
+        {transform:'translate('+(dx*.22+sway)+'px,'+(dy*.18-lift)+'px) rotate('+(dx>0?'-10deg':'9deg')+')',offset:.27},
+        {transform:'translate('+(dx*.76-sway*.4)+'px,'+(dy*.72-lift*.45)+'px) rotate('+(dx>0?'7deg':'-6deg')+')',offset:.76},
+        {transform:'translate('+dx+'px,'+dy+'px) rotate(0deg)',offset:1}
+      ];
+      flyingAnimation=node.animate(keyframes,{duration,easing:'ease-in-out',fill:'forwards'});
+      const flight=flyingAnimation;
+      flight.onfinish=()=>{
+        if(flyingAnimation!==flight)return;
+        node.style.left=x+'px';node.style.top=y+'px';
+        flight.cancel();flyingAnimation=null;
+      };
     }
     function say(message){
       if(!node||!enabled)return;
@@ -765,12 +793,16 @@
       ensure();if(!enabled||busy)return;
       hop++;
       const {w,h}=bounds();
-      const x=16+((hop*137+53)%Math.max(30,w-110));
-      const y=105+((hop*113+29)%Math.max(40,h-275));
+      // Small hops alternate with longer loops: no mechanically repeating corners.
+      const angle=hop*2.399963229728653;
+      const radius=62+(hop%3)*42;
+      const from=node.getBoundingClientRect();
+      const x=from.left+Math.cos(angle)*radius;
+      const y=from.top+Math.sin(angle)*radius*.8;
       node.classList.add('lj-companion-flying');
-      move(x,y);
+      move(Math.max(15,Math.min(w-90,x)),Math.max(94,Math.min(h-175,y)));
       if(withMessage)say(sayings[hop%sayings.length]);
-      setTimeout(()=>node?.classList.remove('lj-companion-flying'),1150);
+      setTimeout(()=>node?.classList.remove('lj-companion-flying'),1650);
     }
     function followTab(){
       if(!enabled||busy)return;
