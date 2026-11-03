@@ -801,3 +801,12 @@ body{background:radial-gradient(circle at 13% 15%,#fff0b4 0,transparent 32%),rad
 .lj-fixed-garden.lj-time-night .lj-timeline-world:before{display:none!important}
 .lj-fixed-garden .lj-landscape-wrap{pointer-events:none}
 .lj-fixed-garden .lj-flower{touch-action:manipulation}
+
+/* Keep all flower stems physically planted in the larger green lawn.
+   The top/left coordinates are ground anchor positions, not flower centers. */
+.lj-fixed-garden .lj-timeline-world .lj-flower{
+  transform:translate(-50%,-96%) rotate(var(--flower-rotate,0deg)) scale(var(--flower-size,1));
+  transform-origin:50% 96%;
+  overflow:visible;
+}
+.lj-fixed-garden .lj-timeline-world .lj-flower svg{overflow:visible}
