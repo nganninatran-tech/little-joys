@@ -912,7 +912,7 @@
     function ensure(){
       if(!node){
         node=document.createElement('div');node.id='little-joys-bumble';node.className='lj-companion';
-        node.innerHTML='<button type="button" class="lj-companion-tap" aria-label="Tap Bumble to fly around with you" title="Tap Bumble to fly around">'+garden.bee()+'</button><span class="lj-companion-can" aria-hidden="true"><svg viewBox="0 0 55 55"><path d="M12 18h30l-5 28H18Z" fill="#ffce70" stroke="#8d693f" stroke-width="3" stroke-linejoin="round"/><path d="M17 18Q15 6 26 6Q38 6 37 18" fill="none" stroke="#8d693f" stroke-width="3"/><path d="M11 21Q-1 20 4 30Q8 36 15 31" fill="none" stroke="#8d693f" stroke-width="3"/><path d="M40 18L51 11L50 19L41 27" fill="#e7b55a" stroke="#8d693f" stroke-width="2.5"/><path d="M22 31h13" stroke="#fff6d8" stroke-width="3" stroke-linecap="round"/></svg></span><span class="lj-companion-bubble" aria-live="polite" role="status"></span><span class="lj-companion-splash" aria-hidden="true">💧 💧 ✧</span>';
+        node.innerHTML='<button type="button" class="lj-companion-tap" aria-label="Tap Bumble to fly around with you" title="Tap Bumble to fly around">'+garden.bee()+'</button><span class="lj-companion-can" aria-hidden="true"><svg viewBox="0 0 55 55"><g transform="translate(55 0) scale(-1 1)"><path d="M12 18h30l-5 28H18Z" fill="#ffce70" stroke="#8d693f" stroke-width="3" stroke-linejoin="round"/><path d="M17 18Q15 6 26 6Q38 6 37 18" fill="none" stroke="#8d693f" stroke-width="3"/><path d="M11 21Q-1 20 4 30Q8 36 15 31" fill="none" stroke="#8d693f" stroke-width="3"/><path d="M40 18L51 11L50 19L41 27" fill="#e7b55a" stroke="#8d693f" stroke-width="2.5"/><path d="M22 31h13" stroke="#fff6d8" stroke-width="3" stroke-linecap="round"/></g></svg></span><span class="lj-companion-bubble" aria-live="polite" role="status"></span><span class="lj-companion-splash" aria-hidden="true">💧 💧 ✧</span>';
         document.body.append(node);
         bubble=node.querySelector('.lj-companion-bubble');can=node.querySelector('.lj-companion-can');
         node.querySelector('button').addEventListener('click',()=>{if(busy)return;roam(true);});
@@ -952,7 +952,7 @@
       const target=[...document.querySelectorAll('.lj-garden-scene .lj-flower')].find(x=>!x.classList.contains('lj-stage-3'))||document.querySelector('.lj-garden-scene .lj-flower');
       const {w,h}=bounds();
       const rect=target?.getBoundingClientRect();
-      const x=rect?rect.left+rect.width/2-35:w*.52;
+      const x=rect?rect.left+rect.width/2+7:w*.52; // Left-pointing spout aligns above the flower
       const y=rect?rect.top-63:h*.4;
       node.classList.add('lj-companion-flying','lj-companion-watering');
       say('A little water for your joy!');
