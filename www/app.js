@@ -794,14 +794,14 @@
     const h=Math.max(360,height);
     return '<svg class="lj-landscape" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 '+h+'" preserveAspectRatio="none" aria-hidden="true">'+
       '<g class="lj-garden-bushes" fill="#4a9864" stroke="#31754e" stroke-width="3">'+
-      '<path d="M-12 328Q-18 296 12 292Q22 266 48 282Q64 255 89 281Q112 272 125 303L130 346Z"/>'+
-      '<path d="M466 350Q466 304 490 303Q497 275 526 289Q551 259 577 285Q605 279 615 310V350Z"/>'+
+      '<path d="M-12 248Q-18 209 12 208Q22 178 48 196Q64 162 89 194Q112 181 129 221L135 263Z"/>'+
+      '<path d="M462 262Q462 217 490 216Q497 180 526 199Q551 164 577 190Q609 183 615 227V267Z"/>'+
       '</g>'+
-      '<path class="lj-grass-hill" d="M0 343Q143 291 300 314Q461 284 600 340V'+h+'H0Z" fill="#91c965" stroke="#4c9652" stroke-width="4"/>'+
+      '<path class="lj-grass-hill" d="M0 232Q145 160 300 190Q460 162 600 230V'+h+'H0Z" fill="#91c965" stroke="#4c9652" stroke-width="4"/>'+
       '<g class="lj-garden-tufts" fill="none" stroke="#387e46" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">'+
-      '<path d="M66 361q-7 -15 -13 -7m13 7q0 -23 9 -21m-9 21q13 -14 19 -7"/>'+
-      '<path d="M255 386q-8 -15 -14 -7m14 7q0 -22 9 -20m-9 20q12 -13 18 -6"/>'+
-      '<path d="M490 367q-7 -16 -14 -9m14 9q0 -20 9 -19m-9 19q13 -13 18 -7"/>'+
+      '<path d="M75 305q-8 -14 -15 -8m15 8q0 -22 9 -21m-9 21q14 -12 20 -5"/>'+
+      '<path d="M255 356q-8 -15 -14 -7m14 7q0 -22 9 -20m-9 20q12 -13 18 -6"/>'+
+      '<path d="M490 300q-7 -16 -14 -9m14 9q0 -20 9 -19m-9 19q13 -13 18 -7"/>'+
       '</g></svg>';
   }
   function scene(entries,start){
@@ -866,10 +866,13 @@
       const row=Math.floor(i/cols),col=i%cols;
       // Staggered, layered flower bed rather than a rigid row of identical daisies.
       const x=(col+.47+(row%2)*.23)*100/cols+(rnd(m.id,'x')-.5)*4;
-      const baseY=53+row*(39/rows);
-      const y=baseY+(rnd(m.id,'y')-.5)*7+(col%2?1.6:-1.4);
+      // "top" is the soil anchor: the very bottom of the flower's stem.
+      // Keep every stem rooted within the enlarged grassy hill, even in crowded weeks.
+      const rowCount=Math.max(1,Math.ceil(planted.length/cols));
+      const baseY=rowCount===1?77:62+row*(31/(rowCount-1));
+      const y=Math.min(94,baseY+(rnd(m.id,'y')-.5)*3);
       const h=new Date(m.timestamp).getHours(),sp=FLOWER_CLOCK[h],stage=growthStage(m,moments);
-      const size=Math.max(.70,Math.min(1.28,1.13-rows*.045+(rnd(m.id,'scale')-.5)*.24));
+      const size=Math.max(.43,Math.min(1.24,1.12-Math.max(0,rows-2)*.085+(rnd(m.id,'scale')-.5)*.18));
       return '<button type="button" class="lj-flower lj-stage-'+stage+'" data-edit="'+escapeHtml(m.id)+'" style="left:'+Math.max(5,Math.min(95,x))+'%;top:'+y+'%;--flower-size:'+size+';--flower-rotate:'+((rnd(m.id,'twist')-.5)*17)+'deg;z-index:'+(20+row*3+(i%3))+'" title="'+escapeHtml(sp[0]+' · '+new Date(m.timestamp).toLocaleDateString())+'" aria-label="'+escapeHtml('Open '+sp[0]+' memory, '+new Date(m.timestamp).toLocaleString())+'">'+flower(m)+'</button>';
     }).join('');
     const time=gardenTime(),weather=gardenWeather.kind||'unknown';
