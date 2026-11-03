@@ -730,7 +730,10 @@
     }).join('');
     return '<div class="lj-garden-scene'+(laughs?' has-laughs':'')+'" style="min-height:'+Math.max(300,240+rows*65)+'px" role="group" aria-label="'+pos.length+' flowers, one per happy moment"><div class="lj-sky-sun">☀</div><div class="lj-hill lj-back"></div><div class="lj-hill lj-front"></div>'+(laughs?'<span class="lj-twinkle" aria-hidden="true">✧ ✦ ✧</span>':'')+flowers+(!pos.length?'<p class="lj-empty">A sunny little space for your first flower.<small>No rush to grow.</small></p>':'')+'<span class="lj-water-drops" aria-hidden="true">💧 ✧ 💧</span></div>';
   }
-  function home(){const start=weekOf(new Date()),entries=items(start),joys=entries.filter(m=>m.type==='joy').length,laughs=entries.filter(m=>m.type==='laugh').length;const line=beeLines[(seed(weekKey(new Date())+':'+new Date().getHours())+messageOffset)%beeLines.length];return '<section class="lj-garden"><div class="lj-garden-head"><div><span class="eyebrow">YOUR LITTLE GARDEN</span><h2>A pocketful of sunshine.</h2><p>'+escapeHtml(label(start))+'</p></div><div class="lj-count"><strong>'+joys+'</strong> '+(joys===1?'flower':'flowers')+'<small>'+laughs+' little laughs</small></div></div>'+scene(entries,start)+'<p class="lj-tip">Each happy moment plants one flower bud. Every laugh waters your existing flowers. Three laughs help them open into full blooms.</p></section>'+(tone==='quiet'?'':'<section class="lj-bumble"><div class="lj-bee-face">'+bee()+'</div><div><strong>Buzz from Bumble</strong><p>'+escapeHtml(line)+'</p><button type="button" class="lj-mini-button" data-garden="bee">Another little buzz ↗</button></div></section>');}
+  function home(){
+    const start=weekOf(new Date()),entries=items(start),joys=entries.filter(m=>m.type==='joy').length,laughs=entries.filter(m=>m.type==='laugh').length;
+    return '<section class="lj-garden"><div class="lj-garden-head"><div><span class="eyebrow">YOUR LITTLE GARDEN</span><h2>A pocketful of sunshine.</h2><p>'+escapeHtml(label(start))+'</p></div><div class="lj-count"><strong>'+joys+'</strong> '+(joys===1?'flower':'flowers')+'<small>'+laughs+' little laughs</small></div></div>'+scene(entries,start)+'<p class="lj-tip">Each happy moment plants one flower bud. Every laugh waters your existing flowers. Three laughs help them open into full blooms.</p></section><button type="button" class="lj-bumble-chat-link" data-goto="together">'+bee()+'<span><strong>Want to talk to Bumble?</strong><small>Ask about flowers, jokes and local weather.</small></span><span aria-hidden="true">›</span></button>';
+  }
   function flowerBook(){
     const counts=Array(24).fill(0);
     for(const m of moments){if(m.type==='joy'){const hour=new Date(m.timestamp).getHours();if(hour>=0&&hour<24)counts[hour]++;}}
@@ -1016,7 +1019,6 @@
   function renderTogether(){return bumbleChat.render();}
   function renderYou() {
     return `<span class="eyebrow">MADE TO BE YOURS</span><h1 class="page-title">Your space, your pace.</h1><p class="page-description">Your little moments are yours to keep. This version saves everything on this device, without an account.</p>
-      ${garden.settings()}
       ${companion.settings()}
       ${sunshineSettingsHtml()}
       <details class="lj-microphone-details"><summary>Experimental laughter listener</summary>${micCard()}</details>
