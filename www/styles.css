@@ -459,3 +459,21 @@ button:focus-visible,input:focus-visible,textarea:focus-visible {outline-color:#
 .sunshine-toggle.is-sunny .smile-punctuation{transform:rotateY(90deg) scale(.8)}
 .story-footer span{display:inline-block;vertical-align:-.3em;margin-left:8px;font-size:22px}
 .hero-card:after{display:none}
+
+/* Little Joys sunshine garden — warm botanical illustration */
+:root{--butter:#fff0b1;--cream:#fffaf0;--paper:#fffdf4;--sage:#a9bc90}
+body{background:radial-gradient(circle at 13% 15%,#fff0b4 0,transparent 32%),radial-gradient(circle at 88% 80%,#ffe8aa 0,transparent 34%),#fff9df}
+.lj-garden,.lj-weeks,.lj-bee-settings,.lj-bumble{margin:18px 0;border-radius:24px;background:#fffaf0;border:1px solid #ead9a9;box-shadow:0 12px 38px rgba(151,115,48,.08)}
+.lj-garden{padding:17px 15px 12px}.lj-garden-head{display:flex;gap:12px;justify-content:space-between;align-items:center;margin-bottom:13px}.lj-garden-head h2,.lj-weeks h2,.lj-bee-settings h2{font:normal 27px/1.12 Georgia,serif;color:#74552d;margin:5px 0}.lj-garden-head p,.lj-weeks>p{font-size:12px;color:#94774b;margin:0}.lj-count{white-space:nowrap;font-size:12px;color:#826338;text-align:center;background:#fff1c5;padding:9px 12px;border-radius:19px}.lj-count strong{font:normal 23px Georgia,serif}.lj-count small{display:block;font-size:10px;color:#9f8359;margin-top:3px}
+.lj-garden-scene{height:330px;overflow:hidden;position:relative;border-radius:19px;background:linear-gradient(#fff1b8 0%,#fff8df 68%,#eaf0d9 100%);isolation:isolate}
+.lj-sky-sun{position:absolute;right:9%;top:8%;font-size:63px;line-height:1;color:#e7b34b;filter:drop-shadow(0 0 20px #ffe2a2);opacity:.7}
+.lj-hill{position:absolute;bottom:-11%;left:-12%;width:126%;height:41%;border-radius:50% 50% 0 0}.lj-back{background:#d8e5bd;bottom:-6%;transform:rotate(-4deg)}.lj-front{background:#bad19c;bottom:-19%;transform:rotate(4deg)}
+.lj-flower{position:absolute;z-index:3;transform:translate(-50%,-65%) scale(var(--flower-size));background:none;border:0;padding:0;width:62px;height:78px;filter:drop-shadow(0 3px 2px rgba(86,95,59,.14));transition:transform .25s ease}.lj-flower:hover,.lj-flower:focus-visible{transform:translate(-50%,-75%) scale(calc(var(--flower-size)*1.12))}.lj-flower svg{width:100%;height:100%}
+.lj-bee-fly{position:absolute;right:18%;top:26%;width:67px;z-index:4;animation:lj-float 4s ease-in-out infinite;pointer-events:none}.lj-bee-fly svg{width:100%}.lj-twinkle{position:absolute;left:14%;top:22%;font-size:32px;color:#e3b14b;animation:lj-twinkle 3s ease-in-out infinite}
+.lj-empty{position:absolute;left:12%;right:12%;top:45%;z-index:3;text-align:center;font:18px Georgia,serif;color:#7d6848}.lj-empty small{display:block;font:12px system-ui,sans-serif;margin-top:8px}.lj-tip{font-size:11px;color:#8f774f;text-align:center;margin:12px 0 2px}
+.lj-bumble{padding:15px;display:flex;align-items:center;gap:14px}.lj-bee-face{width:74px;flex:none;animation:lj-float 4s ease-in-out infinite}.lj-bee-face svg{width:100%}.lj-bumble strong{color:#735634;font:normal 19px Georgia,serif}.lj-bumble p{margin:5px 0;color:#7d684b;font-size:13px}.lj-mini-button,.lj-save,.lj-tone{background:#ffe7a0;border:1px solid #eac476;color:#765728;border-radius:99px;padding:9px 14px;font-size:12px;font-weight:650}
+.lj-weeks{padding:18px 13px}.lj-weeks>p{margin:8px 0 17px}.lj-week-card{padding:14px;background:#fffdf5;border:1px solid #efdbb2;border-radius:20px;margin-top:15px;text-align:center}.lj-week-card h3{font:normal 23px Georgia,serif;color:#80633c;margin:8px 0 13px}.lj-week-card .lj-garden-scene{height:270px}.lj-week-card>p{font-size:13px;color:#886c44;margin:13px}.lj-save{width:100%}
+.lj-bee-settings{padding:18px}.lj-bee-settings p{font-size:13px;color:#8d7759}.lj-tone-options{display:flex;gap:8px;flex-wrap:wrap}.lj-tone{background:#fffdf3}.lj-tone.chosen{background:#f6d58a}
+@keyframes lj-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}@keyframes lj-twinkle{0%,100%{opacity:.4}50%{opacity:1}}
+@media(max-width:410px){.lj-garden-head h2{font-size:22px}.lj-garden{padding:12px}.lj-count{padding:7px}.lj-flower{width:51px;height:65px}.lj-garden-scene{height:310px}}
+@media(prefers-reduced-motion:reduce){.lj-bee-face,.lj-bee-fly,.lj-twinkle{animation:none!important}}
