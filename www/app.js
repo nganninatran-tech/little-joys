@@ -1284,7 +1284,7 @@
     function add(who,text){messages.push({who,text:String(text).slice(0,700)});messages=messages.slice(-30);save();}
     function history(){return messages.map(m=>'<div class="lj-chat-message '+(m.who==='you'?'mine':'theirs')+'"><span class="lj-chat-speaker">'+(m.who==='you'?'You':'Bumble 🐝')+'</span><p>'+escapeHtml(m.text)+'</p></div>').join('');}
     function render(){
-      return '<section class="lj-chat"><span class="eyebrow">YOUR BUZZY LITTLE FRIEND</span><h1 class="page-title">Chat with Bumble.</h1><p class="page-description">Ask him how to grow your favorite Flower Clock blooms: sunlight, watering, soil, bloom season, troubleshooting, or pet safety. Bumble uses an offline plant guide, not open-ended AI.</p><div class="lj-chat-profile"><div class="lj-chat-profile-bee">'+garden.bee()+'</div><div><strong>Bumble the flower guide</strong><small>24 flowers · Plant care · Weather · Garden</small></div></div><div class="lj-chat-messages" id="lj-chat-messages" aria-live="polite">'+history()+'</div><div class="lj-chat-prompts"><button type="button" data-bumble-prompt="Tell me a joke">Tell me a joke</button><button type="button" data-bumble-prompt="How do I grow lavender?">Growing tips</button><button type="button" data-bumble-prompt="How much sun do hydrangeas need?">Sun & shade</button><button type="button" data-bumble-prompt="When do dahlias bloom?">Bloom season</button><button type="button" data-bumble-prompt="What’s the weather?">Weather</button><button type="button" data-bumble-prompt="How is my garden doing?">Garden status</button><button type="button" data-bumble-prompt="What hour am I happiest?">Happy hours</button><button type="button" data-bumble-prompt="When did I laugh the most?">Laugh hours</button></div><form class="lj-chat-form" id="lj-chat-form"><label class="sr-only" for="lj-chat-input">Message Bumble</label><input id="lj-chat-input" maxlength="300" autocomplete="off" placeholder="Ask Bumble something..." required><button class="lj-chat-send" type="submit" aria-label="Send message">'+icon('arrow',20)+'</button></form><p class="lj-chat-note">Weather uses your approximate device location only after you allow it. Your chat stays in this browser.</p></section>';
+      return '<section class="lj-chat"><span class="eyebrow">YOUR BUZZY LITTLE FRIEND</span><h1 class="page-title">Chat with Bumble.</h1><p class="page-description">Ask him how to grow your favorite Flower Clock blooms: sunlight, watering, soil, bloom season, troubleshooting, or pet safety. Bumble can answer questions about flowers beyond the Flower Clock when his online expert is connected. Otherwise he uses his built-in 24-flower guide.</p><div class="lj-chat-profile"><div class="lj-chat-profile-bee">'+garden.bee()+'</div><div><strong>Bumble the flower guide</strong><small>24 flowers · Plant care · Weather · Garden</small></div></div><div class="lj-chat-messages" id="lj-chat-messages" aria-live="polite">'+history()+'</div><div class="lj-chat-prompts"><button type="button" data-bumble-prompt="Tell me a joke">Tell me a joke</button><button type="button" data-bumble-prompt="How do I grow lavender?">Growing tips</button><button type="button" data-bumble-prompt="How much sun do hydrangeas need?">Sun & shade</button><button type="button" data-bumble-prompt="When do dahlias bloom?">Bloom season</button><button type="button" data-bumble-prompt="What’s the weather?">Weather</button><button type="button" data-bumble-prompt="How is my garden doing?">Garden status</button><button type="button" data-bumble-prompt="What hour am I happiest?">Happy hours</button><button type="button" data-bumble-prompt="When did I laugh the most?">Laugh hours</button></div><form class="lj-chat-form" id="lj-chat-form"><label class="sr-only" for="lj-chat-input">Message Bumble</label><input id="lj-chat-input" maxlength="300" autocomplete="off" placeholder="Ask Bumble something..." required><button class="lj-chat-send" type="submit" aria-label="Send message">'+icon('arrow',20)+'</button></form><p class="lj-chat-note">Weather uses location only with permission. When the online flower expert is enabled, flower questions and recent chat context are sent securely to the AI provider; your saved memories are not sent.</p></section>';
     }
     function refresh(){
       const area=document.querySelector('#lj-chat-messages');
@@ -1344,11 +1344,40 @@
       const varieties=stats.varieties.length?stats.varieties.slice(0,5).map(([name,count])=>count+' '+name+(count===1?'':'s')).join(', '):'none planted yet';
       return 'Garden check! '+scope.charAt(0).toUpperCase()+scope.slice(1)+': '+stats.flowers+' '+(stats.flowers===1?'flower':'flowers')+' and '+stats.laughs+' '+(stats.laughs===1?'laugh':'laughs')+'. Your flowers include '+varieties+'. '+stats.stages[3]+' fully blooming; '+(stats.stages[0]+stats.stages[1]+stats.stages[2])+' still growing. Want to know which flowers you have or which hours you log the most joy and laughter?';
     }
+    let aiBusy=false;
+    async function askFlowerExpert(text){
+      if(aiBusy)return false;
+      aiBusy=true;
+      const historyForAI=messages.slice(-9,-1).map(m=>({who:m.who,text:m.text}));
+      try{
+        const response=await fetch('/.netlify/functions/bumble',{
+          method:'POST',headers:{'content-type':'application/json'},
+          body:JSON.stringify({message:text,history:historyForAI})
+        });
+        if(response.status===404||response.status===503)return false;
+        const data=await response.json();
+        if(!response.ok){add('bumble',data.reply||'I could not reach my flower guide just now.');refresh();return true;}
+        if(typeof data.reply!=='string'||!data.reply.trim())return false;
+        add('bumble',data.reply);refresh();return true;
+      }catch{return false;}finally{aiBusy=false;}
+    }
     async function send(text){
-      text=String(text||'').trim().slice(0,300);if(!text)return;
+      text=String(text||'').trim().slice(0,300);if(!text||aiBusy)return;
       add('you',text);
       const input=text.toLowerCase();
       if(/weather|temperature|forecast|outside|rain today|sunny today/.test(input)){refresh();await weather();return;}
+      // Keep personal journal statistics, weather and jokes inside the app; none are sent to AI.
+      const savedGardenQuestion=/garden status|garden doing|how is my garden|my garden|my flowers|flowers do i have|what flowers|which flowers|flower types|flower list|varieties|still growing|fully bloom|watered|flower growth|growth stage|grow my flowers|when did i laugh|laugh.*most|most.*laugh|when am i happy|when am i happiest|what hour|which hour|happy hours|laugh hours|happiest hour|time of day|happiness pattern/.test(input)&&!namedFlower(input);
+      if(savedGardenQuestion){add('bumble',gardenReport(input));refresh();return;}
+      if(/joke|make me laugh|make me smile/.test(input)){add('bumble',jokes[jokeIndex++%jokes.length]);refresh();return;}
+      const gardeningQuestion=/flower|plant|grow|growing|seed|bulb|blossom|petal|bloom|soil|fertiliz|compost|prun|propagat|cutting|sunlight|shade|watering|water|gardenia|orchid|jasmine|hibiscus|azalea|marigold|petunia|begonia|geranium|magnolia|tulip|rose|daisy|lavender|hydrangea|sunflower|dahlia|lily|peony|pollen|pollinat|leaf|leaves|root|stem|shrub|trees|toxic|poison|pet safe|dog safe|cat safe|wilt|yellowing/.test(input);
+      const previousQuestion=messages.slice(-5,-1).reverse().find(m=>m.who==='you');
+      const followUp=previousQuestion&&/flower|plant|grow|soil|sun|shade|water|bloom|gardenia|orchid|lavender|hydrangea|rose|dahlia|lily/.test(previousQuestion.text.toLowerCase())&&/^(how|what|when|why|where|can|should|is|are|do|does|and|what about|how about|more about|tell me more|yes|no)\b/.test(input);
+      if(gardeningQuestion||followUp){
+        refresh();
+        if(await askFlowerExpert(text))return;
+        // GitHub Pages is static. Until a private key is configured, use the local guide.
+      }
       // Named flowers and follow-up care questions take priority over the app's virtual garden report.
       const askingAboutSavedGarden=/garden status|garden doing|how is my garden|my garden|my flowers|flowers do i have|what flowers|which flowers|flower types|flower list|varieties|still growing|fully bloom|watered|flower growth|growth stage|grow my flowers|happy hours|laugh hours/.test(input)&&!namedFlower(input);
       const careAnswer=askingAboutSavedGarden?'':flowerCareReply(input);
