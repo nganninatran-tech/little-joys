@@ -492,3 +492,30 @@ body{background:radial-gradient(circle at 13% 15%,#fff0b4 0,transparent 32%),rad
 .lj-book-flower small{font-size:10px;line-height:1.3;color:#927b5b}
 .lj-book-grown{font-size:9px;color:#997646;margin-top:auto}
 @media(min-width:600px){.lj-book-grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+
+/* Sunshine storybook botanical polish — delicate art, simple journal surfaces */
+.lj-garden,.lj-bumble,.lj-week-card,.lj-flowerbook,.lj-bee-settings{
+  box-shadow:0 9px 28px rgba(155,119,46,.07);
+}
+.lj-garden{background:linear-gradient(160deg,#fffdf1,#fff7dc 65%,#fff9e8);}
+.lj-garden-scene{
+  background:radial-gradient(circle at 82% 17%,rgba(255,237,157,.98),transparent 24%),
+    linear-gradient(180deg,#ffedb7 0%,#fff5d1 47%,#fff9e3 70%,#e9efd9 100%);
+  border:1px solid rgba(232,196,111,.52);
+}
+.lj-hill{box-shadow:inset 0 5px 25px rgba(255,255,245,.16);}
+.lj-flower{
+  filter:drop-shadow(0 3px 3px rgba(98,96,53,.11)) saturate(.92);
+  transform-origin:center 80%;
+}
+.lj-flower svg,.lj-book-illustration svg{overflow:visible}
+.lj-book-flower{
+  background:linear-gradient(180deg,#fffdf5,#fff8e8);
+  border-color:#eadbb8;
+  transition:transform .2s ease,border-color .2s ease;
+}
+.lj-book-flower.discovered{background:linear-gradient(180deg,#fffdf5,#fff0cb)}
+.lj-book-illustration{filter:drop-shadow(0 2px 2px rgba(128,105,62,.1))}
+.lj-bumble{background:linear-gradient(100deg,#fff9e7,#fffdf4);}
+.lj-week-card{background:#fffcf2}
+@media(prefers-reduced-motion:reduce){.lj-book-flower{transition:none}}
