@@ -611,7 +611,7 @@
     const path=(d,c,stroke='',w=1)=>'<path d="'+d+'" fill="'+c+'" stroke="'+(stroke||c)+'" stroke-width="'+w+'" stroke-linejoin="round" stroke-linecap="round"/>';
     const circle=(x,y,r,c)=>'<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+c+'"/>';
     const repeat=(n,f)=>Array.from({length:n},(_,i)=>f(i)).join('');
-    const radial=(n,rx,ry,c,offset=28,shift=0)=>repeat(n,i=>pet(50,offset,rx,ry,c,i*360/n+shift));
+    const radial=(n,rx,ry,c,offset=28,shift=0)=>repeat(n,i=>'<g transform="rotate('+(i*360/n+shift)+' 50 50)">'+pet(50,offset,rx,ry,c)+'</g>');
     const littleBloom=(x,y,color,r=5,mid='#f3d77e')=>repeat(5,i=>{const a=i*Math.PI*2/5;return pet(x+Math.sin(a)*r*.69,y-Math.cos(a)*r*.69,r*.52,r*.8,color,i*72);})+circle(x,y,r*.38,mid);
     const pointed=(n,color,length=28,width=12)=>repeat(n,i=>'<path d="M50 50Q'+(50-width)+' '+(50-length*.65)+' 50 '+(50-length)+'Q'+(50+width)+' '+(50-length*.65)+' 50 50Z" fill="'+color+'" stroke="'+color+'" stroke-width=".8" transform="rotate('+(i*360/n)+' 50 50)"/>');
 
@@ -646,10 +646,19 @@
         leaves=path('M48 117Q32 92 39 83Q48 90 52 118','#7fa76f')+path('M52 120Q67 91 61 84Q52 93 50 118','#98b87e');
         head=pointed(6,'#baa6dc',36,15)+path('M50 61L48 27M52 59L55 31','none','#e4ad50',3.2)+circle(50,39,4,'#f1c36b');
         break;
-      case 6: // Daffodil — trumpet center with six pointed petals
-        head=radial(6,12,19,'#f2df85',24,30)+circle(50,50,15,'#f5bd48')+path('M39 44Q50 36 61 44L64 57Q50 66 36 57Z','#efa741','#ce8c37');break;
-      case 7: // Daisy — slender white rays and yellow disk
-        head=radial(15,6,18,'#fff9ec',27)+circle(50,50,14,'#edc566')+circle(47,46,3,'#f6e6a0');break;
+      case 6: // Daffodil — six pointed yellow tepals and a golden projecting trumpet
+        head=pointed(6,'#f1d36c',29,14)
+          +circle(50,50,13,'#edb34f')
+          +path('M38 43Q50 36 62 43L65 57Q50 65 35 57Z','#efae42','#cd9045')
+          +path('M38 45Q50 41 62 45','none','#f8d27c',1.8)
+          +circle(50,52,5,'#d99836');
+        break;
+      case 7: // Daisy — white radial ray florets and golden textured disk
+        head=radial(18,5.5,17,'#fffef2',29,8)
+          +radial(18,4.5,14,'#f6f3e7',31,18)
+          +circle(50,50,12,'#e8bf63')
+          +repeat(14,i=>{const t=i*2.39996,r=3+Math.sqrt(i)*2.15;return circle(50+Math.sin(t)*r,50+Math.cos(t)*r,1.1,'#dca34d');});
+        break;
       case 8: // Freesia: curved inflorescence and flared funnel blossoms
         stem=path('M49 122Q59 75 32 26','none','#78976a',3);
         leaves=path('M49 115Q22 87 31 74Q47 83 53 117','#91ab7d');
@@ -660,10 +669,22 @@
       case 10: // Dianthus: frilled petal edges, compact pink flower
         head=repeat(6,i=>path('M50 50L35 24l5 1 2-7 5 5 5-7 5 7 7-3-2 30Z','#e6a1b8','#ce83a4').replace('<path ','<path transform="rotate('+(i*60)+' 50 50)" '))+circle(50,50,7,'#ac789a');
         break;
-      case 11: // Pansy — contrasting blotches on broad petals
-        head=pet(34,36,17,16,'#9376bb',-22)+pet(66,36,17,16,'#9f87c9',22)+pet(50,28,15,18,'#b2a2d4')+pet(35,61,17,19,'#e3bc5e',-25)+pet(65,61,17,19,'#e6c671',25)+circle(50,49,9,'#553f79')+circle(50,51,3,'#e7ca68');break;
-      case 12: // Sunflower — densely spaced golden rays, brown seed head
-        head=radial(19,7,19,'#f3c44f',25)+circle(50,50,19,'#735135')+repeat(10,i=>circle(40+(i%5)*5,42+Math.floor(i/5)*11,1.4,'#d3a665'));break;
+      case 11: // Pansy — broad upper lobes and contrasting lower face
+        head=pet(31,37,18,18,'#9475bd',-20)
+          +pet(69,37,18,18,'#9b82c6',20)
+          +pet(50,27,15,18,'#ae9dd5')
+          +pet(34,62,18,18,'#e2c272',-21)
+          +pet(66,62,18,18,'#e7c87e',21)
+          +path('M35 46Q42 36 50 49Q59 36 65 46Q59 60 50 60Q42 61 35 46Z','#675085','#675085')
+          +circle(50,50,3.3,'#f1ca68');
+        break;
+      case 12: // Sunflower — a proper radial yellow ray and detailed brown seed disk
+        head=radial(20,7.5,19,'#eab748',24,0)
+          +radial(20,6.2,17,'#f4cb60',25,9)
+          +circle(50,50,19,'#765335')
+          +circle(50,50,15,'#89613b')
+          +repeat(33,i=>{const t=i*2.39996,r=3+Math.sqrt(i)*2.6;return circle(50+Math.sin(t)*r,50+Math.cos(t)*r,1.1,i%2?'#b78a51':'#dbb36d');});
+        break;
       case 13: // Goldenrod: branching golden plume rather than a solitary daisy
         stem=path('M49 122Q44 82 51 23','none','#73926a',3);
         head=repeat(8,i=>{const y=33+i*8.4,span=9+i*2.8;return path('M50 '+y+'Q'+(50-span/2)+' '+(y-3)+' '+(50-span)+' '+(y-8),'none','#7f9e6a',1.1)+path('M50 '+y+'Q'+(50+span/2)+' '+(y-5)+' '+(50+span)+' '+(y-10),'none','#7f9e6a',1.1)+repeat(3,j=>circle(50-span+(j*3.6),y-8+j*.6,2,'#e7b84d')+circle(50+span-(j*3.6),y-10+j*.7,2,'#eac052'));});
@@ -671,19 +692,39 @@
       case 14: // Coreopsis: sunny toothed yellow rays and brown center
         head=repeat(9,i=>path('M50 51Q36 33 36 23L41 25L44 18L51 24L57 18L60 26Q66 39 50 51Z','#eec964','#d8a74b').replace('<path ','<path transform="rotate('+(i*40)+' 50 50)" '))+circle(50,50,11,'#a87540');
         break;
-      case 15: // Peony — many ruffled layers
-        head=radial(7,15,19,'#e8a8b1',25)+radial(9,10,14,'#f1c2c7',35,10)+radial(7,7,10,'#f8d4d3',41)+circle(50,50,6,'#dfaa89');break;
-      case 16: // Orchid — bilateral wing petals and ornate lip
-        head=pet(28,37,18,12,'#dab8d9',-26)+pet(72,37,18,12,'#dab8d9',26)+pet(50,23,15,18,'#dfc0e0')+pet(30,61,17,12,'#c9a3cf',24)+pet(70,61,17,12,'#c9a3cf',-24)+path('M40 47Q50 53 60 47Q66 74 50 83Q34 74 40 47Z','#a873b1','#8d6098')+circle(50,56,5,'#f4d08c');break;
+      case 15: // Peony — lush ruffled whorls that fill a broad rounded blossom
+        head=radial(8,14,18,'#df9da9',31,9)
+          +radial(10,11,15,'#edb3bd',33,0)
+          +radial(9,8,12,'#f5c8c8',39,16)
+          +repeat(6,i=>pet(50+Math.cos(i*Math.PI/3)*5,50+Math.sin(i*Math.PI/3)*5,5.3,8.2,'#f7d9d0',i*40))
+          +circle(50,51,4.5,'#edc09f');
+        break;
+      case 16: // Orchid — lateral sepals and a distinct central lip
+        head=pet(29,34,17,12,'#d8b3d6',-30)
+          +pet(71,34,17,12,'#d8b3d6',30)
+          +pet(50,23,14,19,'#e8cee2')
+          +pet(30,60,15,11,'#c9a5d0',20)
+          +pet(70,60,15,11,'#c9a5d0',-20)
+          +path('M39 46Q50 54 61 46Q66 63 57 76L50 82L43 76Q34 61 39 46Z','#a56cb0','#8d5d9b')
+          +path('M44 52Q50 58 56 52','none','#f3d39d',3)
+          +circle(50,60,4,'#efd29c');
+        break;
       case 17: // Gladiolus: alternating blossoms on a tall, single spike
         stem=path('M50 123Q50 70 49 18','none','#77996a',3);
         head=repeat(6,i=>{const y=26+i*14,x=50+(i%2?13:-13);return repeat(5,k=>{const a=k*Math.PI*2/5;return pet(x+Math.sin(a)*9,y-Math.cos(a)*9,6,10,i%2?'#e3a2b4':'#efb4c0',k*72)})+circle(x,y,3.4,'#f1d29b');});
         break;
-      case 18: // Pink rose — overlapping inner spiral and rounded outer petals
-        head=radial(6,15,18,'#e6a7ab',29)+radial(7,11,13,'#f1b7b8',36,13)+path('M43 50Q44 36 55 39Q66 46 55 57Q43 61 44 51Q46 45 54 47','none','#c97f91',3)+circle(50,53,5,'#f0c2b8');break;
-      case 19: // Lavender — purple flowering stalk
-        stem=path('M50 123V24','none','#758c74',3);
-        head=repeat(10,i=>{const y=22+i*6.3,w=5+Math.sin(i/10*Math.PI)*5;return pet(50-w,y,4.8,6.2,'#a392cc',-35)+pet(50+w,y,4.8,6.2,'#9181be',35);});break;
+      case 18: // Pink rose — overlapping pink petals and a small spiraling center
+        head=radial(7,14,17,'#da8f9f',32,7)
+          +radial(8,10.5,14,'#e8a9b4',36,16)
+          +radial(7,8,10,'#f1bcc2',41,0)
+          +path('M46 58Q35 48 44 42Q55 34 60 45Q62 54 52 58Q42 57 45 50Q50 46 55 50','none','#c57f91',2.6)
+          +path('M37 56Q36 65 49 66Q63 66 66 55','none','#d999a5',2);
+        break;
+      case 19: // Lavender — slender green stalk dotted with purple calyxes
+        stem=path('M50 123Q50 70 49 23','none','#708c70',2.6);
+        leaves=path('M49 115Q29 95 34 86Q48 93 51 119','#8eac83')+path('M51 115Q69 95 66 84Q54 94 50 119','#91ad84');
+        head=repeat(13,i=>{const y=22+i*4.5,w=3.5+Math.sin(i/13*Math.PI)*3.6;return pet(50-w,y,3.3,5.8,'#9682be',-35)+pet(50+w,y,3.3,5.8,'#a491cb',35);});
+        break;
       case 20: // Iris — upright standards and hanging falls
         head=pet(50,27,12,26,'#a4a7d4')+pet(31,37,10,20,'#9ba1cf',-35)+pet(69,37,10,20,'#9ba1cf',35)+path('M43 49Q17 44 19 71Q30 93 47 60Z','#778fbe','#7586ab')+path('M57 49Q83 44 81 71Q70 93 53 60Z','#8395c4','#7586ab')+path('M43 47Q50 43 57 47L52 66L48 66Z','#e5c575');break;
       case 21: // Sweet pea — butterfly wing pairs and curved banner
@@ -693,8 +734,12 @@
         leaves=path('M48 121Q27 90 36 72Q49 84 51 121','#83a977')+path('M51 121Q72 92 66 70Q51 86 50 121','#93b283');
         head=repeat(7,i=>repeat(4,j=>{const x=30+j*13+(i%2?5:0),y=23+i*10;return littleBloom(x,y,i%2?'#a994cd':'#b8a6db',7,'#f4e5be');}));
         break;
-      case 23: // Aster — star of slender lilac rays
-        head=radial(21,4.6,18,'#b9a6d9',28)+circle(50,50,12,'#e8bf65')+circle(47,46,3,'#f9e1a0');break;
+      case 23: // Aster — thin lavender rays forming a soft starburst
+        head=radial(24,4.1,19,'#aa98cc',27,0)
+          +radial(24,3.2,16,'#c2b0df',28,7.5)
+          +circle(50,50,11,'#e1b95b')
+          +repeat(13,i=>{const t=i*2.4,r=2.1+Math.sqrt(i)*2.2;return circle(50+Math.sin(t)*r,50+Math.cos(t)*r,1.05,'#f8e1a4');});
+        break;
     }
     // Soft translucent watercolor glazing keeps the illustration warm and light.
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 125" role="img" aria-label="'+name+' — '+meaning+'"><g opacity=".98">'+stem+leaves+'<g class="lj-bloom-head">'+head+accent+'</g><g class="lj-bud-mark"><ellipse cx="50" cy="50" rx="8" ry="12" fill="#e6b2af" stroke="#ce8b95" stroke-width="1"/></g></g></svg>';
@@ -873,11 +918,11 @@
   function renderToday() {
     const today=todayMoments(),counts=countTypes(today);
     return `<div class="lj-home-intro"><span class="eyebrow">YOUR POCKETFUL OF SUNSHINE</span><h1 class="welcome-title">Your little garden.</h1><p>A happy moment plants a flower. A laugh helps it bloom.</p></div>
-      ${garden.home()}
       <div class="lj-quick-actions">
         <button type="button" class="moment-trigger joy" data-add="joy">${icon('heart',24)}<strong>I felt happy</strong><small>Plant a flower</small></button>
         <button type="button" class="moment-trigger laugh" data-add="laugh">${icon('laugh',24)}<strong>I laughed</strong><small>Water your garden</small></button>
       </div>
+      ${garden.home()}
       <button type="button" class="capture-button lj-photo-action" data-capture="joy">${icon('camera',20)}<span><strong>Add a photo memory</strong><small>Optional photo, note and one new flower</small></span>${icon('arrow',16)}</button>
       <div class="lj-mini-stats"><span><strong data-count="joy">${counts.joy}</strong> happy moments today</span><span><strong data-count="laugh">${counts.laugh}</strong> laughs today</span></div>
       <div class="lj-today-bottom">
