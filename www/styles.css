@@ -577,3 +577,19 @@ body{background:radial-gradient(circle at 13% 15%,#fff0b4 0,transparent 32%),rad
 @keyframes lj-bee-hover{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-5px) rotate(3deg)}}
 @keyframes lj-bee-sprinkle{0%{opacity:0;transform:translateY(-9px)}24%{opacity:1}85%{opacity:1}100%{opacity:0;transform:translateY(40px)}}
 @media(prefers-reduced-motion:reduce){.lj-companion,.lj-companion-bubble,.lj-companion-can{transition:none!important}.lj-companion-tap svg,.lj-companion-splash{animation:none!important}}
+
+/* Together is a sharing studio, not a duplicate journal list. */
+.lj-together-studio{padding:6px 0 20px}
+.lj-together-select-label{display:block;font-size:12px;font-weight:700;color:#8b6b3c;margin:18px 0 7px}
+.lj-together-select{appearance:auto;width:100%;max-width:100%;background:#fffaf0;border:1px solid #e5d4a8;border-radius:13px;padding:13px 10px;color:#735331;font-size:13px}
+.lj-together-preview{position:relative;overflow:hidden;background:linear-gradient(148deg,#fff9e7,#fff1cf);margin:18px 0;border-radius:22px;padding:30px 22px 22px;text-align:center;border:1px solid #efd8a6;box-shadow:0 10px 28px #b99b6114}
+.lj-together-preview:before{content:"";position:absolute;left:-65px;top:-65px;width:150px;height:150px;border-radius:100%;background:#fffdf3;opacity:.66}
+.lj-together-preview .eyebrow{position:relative;color:#af834c}
+.lj-together-sun{font-size:49px;color:#e3ad46;line-height:1.2;margin:16px 0}
+.lj-together-preview h2{font:normal 27px/1.25 Georgia,serif;color:#745432;margin:6px 0}
+.lj-together-preview p{font:normal 15px/1.6 Georgia,serif;color:#80633d;margin:14px 0}
+.lj-together-preview small{display:block;font-size:11px;color:#a28354}
+.lj-together-photo{margin:16px auto 0;max-width:250px}.lj-together-photo img{width:100%;max-height:220px;object-fit:cover;border-radius:12px}
+.lj-together-preview-actions{margin-top:22px}.lj-together-preview-actions button{width:100%;justify-content:center;display:flex;align-items:center;gap:9px}
+.lj-together-private{display:flex;align-items:flex-start;gap:7px;color:#90754f;font-size:11px;line-height:1.5}
+.lj-together-private svg{flex-shrink:0}
