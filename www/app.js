@@ -1228,8 +1228,14 @@
     function namedFlower(input){
       const q=' '+cleanFlowerName(input)+' ';
       const aliases={'roses':'Rose','rose bushes':'Rose','hydrangeas':'Hydrangea','sunflowers':'Sunflower','dahlias':'Dahlia','daffodils':'Daffodil','peonies':'Peony','zinnias':'Zinnia','lavenders':'Lavender','irises':'Iris','asters':'Aster','poppies':'Poppy','cosmos flowers':'Cosmos','morning glories':'Morning glory','moonflowers':'Moonflower','sweet peas':'Sweet pea','forget me nots':'Forget-me-not','lilies of the valley':'Lily of the valley'};
-      for(const [a,n] of Object.entries(aliases))if(q.includes(' '+a+' '))return n;
-      return flowerCare.find(f=>q.includes(' '+cleanFlowerName(f[0])+' '))?.[0]||'';
+      for(const [alias,name] of Object.entries(aliases))if(q.includes(' '+alias+' '))return name;
+      for(const f of flowerCare){
+        const n=cleanFlowerName(f[0]);
+        if(q.includes(' '+n+' '))return f[0];
+        if(q.includes(' '+n+'s ')||q.includes(' '+n+'es '))return f[0];
+        if(n.endsWith('y')&&q.includes(' '+n.slice(0,-1)+'ies '))return f[0];
+      }
+      return '';
     }
     function rememberFlower(name){lastCareFlower=name;}
     function flowerCareReply(input){
@@ -1243,7 +1249,7 @@
         /water|thirst|dry|sogg|wet|wilt/.test(question)?'water':
         /soil|drain|compost|fertili|feed|ph\b/.test(question)?'soil':
         /when.*(bloom|flower)|bloom.*when|season|month/.test(question)?'season':
-        /not bloom|won.t bloom|no flower|yellow|brown|dying|wilt|pest|diseas|problem/.test(question)?'trouble':
+        /not bloom|won.t bloom|won t bloom|wont bloom|no flower|yellow|brown|dying|wilt|pest|diseas|problem/.test(question)?'trouble':
         /prun|trim|cut|deadhead|propagat|seed|sow|plant|pot|container|winter|frost/.test(question)?'tip':
         /meaning|symbol|represent/.test(question)?'meaning':'overview';
       let flower=explicit;
