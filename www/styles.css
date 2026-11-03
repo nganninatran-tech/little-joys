@@ -663,10 +663,7 @@ body{background:radial-gradient(circle at 13% 15%,#fff0b4 0,transparent 32%),rad
   background:#f6f2de;
   padding:0;
 }
-.lj-garden-scene[style]{
-  height:var(--unused-height,auto);
-  min-height:0!important;
-}
+.lj-garden-scene[style]{min-height:0!important}
 .lj-landscape-wrap{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .lj-landscape{display:block;width:100%;height:100%;object-fit:fill}
 .lj-garden-scene .lj-flower{
