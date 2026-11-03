@@ -477,3 +477,18 @@ body{background:radial-gradient(circle at 13% 15%,#fff0b4 0,transparent 32%),rad
 @keyframes lj-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}@keyframes lj-twinkle{0%,100%{opacity:.4}50%{opacity:1}}
 @media(max-width:410px){.lj-garden-head h2{font-size:22px}.lj-garden{padding:12px}.lj-count{padding:7px}.lj-flower{width:51px;height:65px}.lj-garden-scene{height:310px}}
 @media(prefers-reduced-motion:reduce){.lj-bee-face,.lj-bee-fly,.lj-twinkle{animation:none!important}}
+
+/* Little Joys botanical flower clock */
+.lj-flowerbook{margin:18px 0;padding:17px 13px;border-radius:22px;background:#fff9e4;border:1px solid #ebd9a7;color:#725632}
+.lj-flowerbook h2{font:normal 26px/1.17 Georgia,serif;margin:5px 0 8px;color:#735832}
+.lj-flowerbook p{font-size:12px;line-height:1.55;color:#846d4b}
+.lj-book-count{display:inline-block;font-size:12px;font-weight:700;color:#86612d;background:#ffe7a1;border-radius:99px;padding:7px 12px;margin:4px 0 14px}
+.lj-book-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.lj-book-flower{min-width:0;text-align:center;background:#fffdf5;border:1px solid #e9dbbd;border-radius:14px;padding:8px 4px;display:flex;align-items:center;flex-direction:column;gap:4px}
+.lj-book-flower.discovered{border-color:#d7bb78;background:#fff8e5}
+.lj-book-illustration{width:61px;height:77px}.lj-book-illustration svg{width:100%;height:100%}
+.lj-book-hour{font-size:10px;font-weight:800;color:#a98147}
+.lj-book-flower strong{font-size:11px;color:#69502f;line-height:1.2}
+.lj-book-flower small{font-size:10px;line-height:1.3;color:#927b5b}
+.lj-book-grown{font-size:9px;color:#997646;margin-top:auto}
+@media(min-width:600px){.lj-book-grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
