@@ -561,7 +561,7 @@
     const item={id:randomId(),type,timestamp:new Date().toISOString(),note:'',sample:false};
     moments.unshift(item);persist();render();syncWidgetJournal();
     if(celebrate)celebrateSavedMoment(type,previous);
-    if(type==='laugh')garden.celebrateLaugh();
+    if(type==='laugh')companion.water(()=>garden.celebrateLaugh());
     showToast(type==='laugh'?'That little laugh is saved.':'That happy moment is saved.','Add a note',()=>openNote(item.id));
   }
   function pulseMomentTrigger(button,type){record(type,true);}
@@ -709,7 +709,7 @@
     const flowers=pos.map(({m,x,y,s})=>{const stage=growthStage(m,entries),sp=FLOWER_CLOCK[new Date(m.timestamp).getHours()];
       return '<button class="lj-flower lj-stage-'+stage+'" type="button" data-edit="'+escapeHtml(m.id)+'" style="left:'+x+'%;top:'+Math.max(20,y)+'%;--flower-size:'+s+'" title="'+escapeHtml(new Date(m.timestamp).toLocaleString()+' · '+sp.join(' — '))+'" aria-label="'+escapeHtml(sp[0]+'. Bloom stage '+stage+' of 3. Open memory')+'">'+flower(m)+'</button>';
     }).join('');
-    return '<div class="lj-garden-scene'+(laughs?' has-laughs':'')+'" style="min-height:'+Math.max(300,240+rows*65)+'px" role="group" aria-label="'+pos.length+' flowers, one per happy moment"><div class="lj-sky-sun">☀</div><div class="lj-hill lj-back"></div><div class="lj-hill lj-front"></div>'+(laughs?'<span class="lj-twinkle" aria-hidden="true">✧ ✦ ✧</span>':'')+flowers+(!pos.length?'<p class="lj-empty">A sunny little space for your first flower.<small>No rush to grow.</small></p>':'')+'<div class="lj-bee-fly" aria-hidden="true">'+bee()+'</div><span class="lj-water-drops" aria-hidden="true">💧 ✧ 💧</span></div>';
+    return '<div class="lj-garden-scene'+(laughs?' has-laughs':'')+'" style="min-height:'+Math.max(300,240+rows*65)+'px" role="group" aria-label="'+pos.length+' flowers, one per happy moment"><div class="lj-sky-sun">☀</div><div class="lj-hill lj-back"></div><div class="lj-hill lj-front"></div>'+(laughs?'<span class="lj-twinkle" aria-hidden="true">✧ ✦ ✧</span>':'')+flowers+(!pos.length?'<p class="lj-empty">A sunny little space for your first flower.<small>No rush to grow.</small></p>':'')+'<span class="lj-water-drops" aria-hidden="true">💧 ✧ 💧</span></div>';
   }
   function home(){const start=weekOf(new Date()),entries=items(start),joys=entries.filter(m=>m.type==='joy').length,laughs=entries.filter(m=>m.type==='laugh').length;const line=beeLines[(seed(weekKey(new Date())+':'+new Date().getHours())+messageOffset)%beeLines.length];return '<section class="lj-garden"><div class="lj-garden-head"><div><span class="eyebrow">YOUR LITTLE GARDEN</span><h2>A pocketful of sunshine.</h2><p>'+escapeHtml(label(start))+'</p></div><div class="lj-count"><strong>'+joys+'</strong> '+(joys===1?'flower':'flowers')+'<small>'+laughs+' little laughs</small></div></div>'+scene(entries,start)+'<p class="lj-tip">Each happy moment plants one flower bud. Every laugh waters your existing flowers. Three laughs help them open into full blooms.</p></section>'+(tone==='quiet'?'':'<section class="lj-bumble"><div class="lj-bee-face">'+bee()+'</div><div><strong>Buzz from Bumble</strong><p>'+escapeHtml(line)+'</p><button type="button" class="lj-mini-button" data-garden="bee">Another little buzz ↗</button></div></section>');}
   function flowerBook(){
@@ -725,8 +725,97 @@
       floral+='<g transform="translate('+xx.toFixed(0)+' '+yy.toFixed(0)+') scale('+scale.toFixed(2)+') translate(-50 -60)">'+art+'</g>';}const title=escapeHtml(label(start));return '<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640"><rect width="960" height="640" fill="#fff4cc"/><rect x="24" y="24" width="912" height="592" rx="32" fill="#fffaf0" stroke="#dfc794" stroke-width="3"/><text x="480" y="98" font-family="Georgia,serif" font-size="42" text-anchor="middle" fill="#76572f">Your week in bloom</text><text x="480" y="139" font-family="Georgia,serif" font-size="23" text-anchor="middle" fill="#9b7b50">'+title+'</text><circle cx="777" cy="227" r="65" fill="#ffe49a"/><path d="M24 470Q200 370 405 464T936 460V610H24Z" fill="#d2dcb7"/><path d="M24 523Q280 420 510 508T936 497V610H24Z" fill="#b9d09a"/>'+floral+(laughs?'<text x="130" y="240" fill="#d7ae58" font-size="35">✧ ✦ ✧</text>':'')+'<text x="480" y="580" font-family="Georgia,serif" font-size="22" text-anchor="middle" fill="#82643e">'+n+' flowers · '+laughs+' laughs · Little Joys (: </text></svg>';}
   async function save(key){const start=new Date(key+'T00:00:00');if(!Number.isFinite(start.getTime()))return;let url;try{const blob=new Blob([recapSvg(start,items(start))],{type:'image/svg+xml'});url=URL.createObjectURL(blob);const image=new Image();await new Promise((ok,no)=>{image.onload=ok;image.onerror=no;image.src=url;});const canvas=document.createElement('canvas');canvas.width=960;canvas.height=640;canvas.getContext('2d').drawImage(image,0,0);const png=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!png)throw new Error('Export failed');const downloadUrl=URL.createObjectURL(png),a=document.createElement('a');a.href=downloadUrl;a.download='little-joys-garden-'+key+'.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(downloadUrl),4000);showToast('Your little garden postcard is saved.');}catch(e){showToast('Could not export this picture on this device.');}finally{if(url)URL.revokeObjectURL(url);}}
   function click(el){if(el.hasAttribute('data-garden')){messageOffset++;render();return true;}if(el.dataset.gardenTone){tone=el.dataset.gardenTone;localStorage.setItem(BEE_KEY,tone);render();return true;}if(el.dataset.gardenWeek){save(el.dataset.gardenWeek);return true;}return false;}
-  return {home,weeks,settings,click,celebrateLaugh};
+  return {home,weeks,settings,click,celebrateLaugh,bee};
 })();
+  // Bumble is a lightweight, on-screen companion. It never changes saved journal data.
+  const companion=(function(){
+    const KEY='little-joys.bumble.follow.v1';
+    let enabled=localStorage.getItem(KEY)!=='off';
+    let node=null, bubble=null, can=null, busy=false, hop=0, bubbleTimer=null,waterTimer=null;
+    const sayings=['Buzz! I’m right here.','Want to explore together?','A little sunshine follows you.','I love your little moments.','Where should we fly next?','Your garden is looking lovely.'];
+    const calm=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)').matches===true;
+    const bounds=()=>({w:window.innerWidth||375,h:window.innerHeight||700});
+    function move(left,top,fast=false){
+      if(!node)return;
+      const {w,h}=bounds(),size=62;
+      const x=Math.max(9,Math.min(w-size-9,left));
+      const y=Math.max(84,Math.min(h-size-108,top));
+      if(fast||calm())node.classList.add('lj-companion-instant');
+      node.style.left=x+'px';node.style.top=y+'px';
+      if(fast||calm())requestAnimationFrame(()=>node?.classList.remove('lj-companion-instant'));
+    }
+    function say(message){
+      if(!node||!enabled)return;
+      bubble.textContent=message;node.classList.add('lj-companion-talking');
+      clearTimeout(bubbleTimer);bubbleTimer=setTimeout(()=>node?.classList.remove('lj-companion-talking'),2900);
+    }
+    function ensure(){
+      if(!node){
+        node=document.createElement('div');node.id='little-joys-bumble';node.className='lj-companion';
+        node.innerHTML='<button type="button" class="lj-companion-tap" aria-label="Tap Bumble to fly around with you" title="Tap Bumble to fly around">'+garden.bee()+'</button><span class="lj-companion-can" aria-hidden="true"><svg viewBox="0 0 55 55"><path d="M12 18h30l-5 28H18Z" fill="#ffce70" stroke="#8d693f" stroke-width="3" stroke-linejoin="round"/><path d="M17 18Q15 6 26 6Q38 6 37 18" fill="none" stroke="#8d693f" stroke-width="3"/><path d="M11 21Q-1 20 4 30Q8 36 15 31" fill="none" stroke="#8d693f" stroke-width="3"/><path d="M40 18L51 11L50 19L41 27" fill="#e7b55a" stroke="#8d693f" stroke-width="2.5"/><path d="M22 31h13" stroke="#fff6d8" stroke-width="3" stroke-linecap="round"/></svg></span><span class="lj-companion-bubble" aria-live="polite" role="status"></span><span class="lj-companion-splash" aria-hidden="true">💧 💧 ✧</span>';
+        document.body.append(node);
+        bubble=node.querySelector('.lj-companion-bubble');can=node.querySelector('.lj-companion-can');
+        node.querySelector('button').addEventListener('click',()=>{if(busy)return;roam(true);});
+        const {w,h}=bounds();move(w-82,h*.55,true);
+        window.addEventListener('resize',()=>{if(node&&!busy){const r=node.getBoundingClientRect();move(r.left,r.top,true);}});
+      }
+      node.hidden=!enabled;
+    }
+    function roam(withMessage=false){
+      ensure();if(!enabled||busy)return;
+      hop++;
+      const {w,h}=bounds();
+      const x=16+((hop*137+53)%Math.max(30,w-110));
+      const y=105+((hop*113+29)%Math.max(40,h-275));
+      node.classList.add('lj-companion-flying');
+      move(x,y);
+      if(withMessage)say(sayings[hop%sayings.length]);
+      setTimeout(()=>node?.classList.remove('lj-companion-flying'),1150);
+    }
+    function followTab(){
+      if(!enabled||busy)return;
+      // Bumble wanders to a new spot when you change screens.
+      roam(false);
+    }
+    function water(onGrow){
+      ensure();
+      if(!enabled){
+        onGrow?.();
+        return;
+      }
+      if(busy){onGrow?.();return;}
+      busy=true;
+      const target=[...document.querySelectorAll('.lj-garden-scene .lj-flower')].find(x=>!x.classList.contains('lj-stage-3'))||document.querySelector('.lj-garden-scene .lj-flower');
+      const {w,h}=bounds();
+      const rect=target?.getBoundingClientRect();
+      const x=rect?rect.left+rect.width/2-35:w*.52;
+      const y=rect?rect.top-63:h*.4;
+      node.classList.add('lj-companion-flying','lj-companion-watering');
+      say('A little water for your joy!');
+      move(x,y);
+      clearTimeout(waterTimer);
+      waterTimer=setTimeout(()=>{
+        node?.classList.add('lj-companion-pouring');
+        onGrow?.();
+        waterTimer=setTimeout(()=>{
+          node?.classList.remove('lj-companion-pouring','lj-companion-watering','lj-companion-flying');
+          busy=false;
+          roam(false);
+        },1350);
+      },calm()?50:900);
+    }
+    function toggle(){
+      enabled=!enabled;
+      localStorage.setItem(KEY,enabled?'on':'off');
+      if(!enabled){busy=false;clearTimeout(waterTimer);}
+      ensure();
+      if(enabled)say('Buzz! I’m back!');
+    }
+    function settings(){
+      return '<section class="lj-companion-settings"><h2>Your little travel buddy</h2><p>Bumble can fly with you around Garden, Memories, Blooms and My Space. Tap Bumble to see where he flies next.</p><button type="button" class="lj-companion-toggle" data-bumble-toggle aria-pressed="'+enabled+'">'+(enabled?'Bumble follows me: On':'Bumble follows me: Off')+'</button></section>';
+    }
+    return {ensure,water,followTab,toggle,settings};
+  })();
   function renderToday() {
     const today=todayMoments(),counts=countTypes(today);
     return `<div class="lj-home-intro"><span class="eyebrow">YOUR POCKETFUL OF SUNSHINE</span><h1 class="welcome-title">Your little garden.</h1><p>A happy moment plants a flower. A laugh helps it bloom.</p></div>
@@ -785,6 +874,7 @@
   function renderYou() {
     return `<span class="eyebrow">MADE TO BE YOURS</span><h1 class="page-title">Your space, your pace.</h1><p class="page-description">Your little moments are yours to keep. This version saves everything on this device, without an account.</p>
       ${garden.settings()}
+      ${companion.settings()}
       ${sunshineSettingsHtml()}
       <details class="lj-microphone-details"><summary>Experimental laughter listener</summary>${micCard()}</details>
       <div class="section-heading"><h2>Your journal</h2></div>
@@ -800,6 +890,7 @@
     const html={today:renderToday,journal:renderJournal,patterns:renderPatterns,together:renderTogether,you:renderYou};
     content.innerHTML=(html[currentTab]||renderToday)();
     hydratePhotos(content);
+    companion.ensure();
     document.querySelectorAll('[data-tab]').forEach(button=>{
       const active=button.dataset.tab===currentTab;button.classList.toggle('active',active);
       if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
@@ -809,6 +900,7 @@
     if (!['today','journal','patterns','together','you'].includes(tab))return;
     if(tab!==currentTab && (mic.status==='on'||mic.status==='starting'))stopMic(true);
     currentTab=tab;render();content.scrollTop=0;
+    companion.followTab();
   }
   const photoPreview=document.querySelector('#photo-preview');
   function showPhotoPreview(data) {
@@ -916,6 +1008,7 @@
     const target=e.target.closest('button');if(!target)return;
     if(target.dataset.add)pulseMomentTrigger(target,target.dataset.add);
     else if(target.dataset.goto)navigate(target.dataset.goto);
+    else if(target.hasAttribute('data-bumble-toggle')){companion.toggle();render();}
     else if(target.hasAttribute('data-garden')||target.hasAttribute('data-garden-tone')||target.hasAttribute('data-garden-week'))garden.click(target);
     else if(target.hasAttribute('data-sun-another')){sunshineOffset++;render();}
     else if(target.hasAttribute('data-sun-toggle-card')){sunshineSettings.show=!sunshineSettings.show;saveSunshineSettings();render();}
