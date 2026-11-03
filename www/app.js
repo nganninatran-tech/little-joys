@@ -1350,7 +1350,8 @@
       const input=text.toLowerCase();
       if(/weather|temperature|forecast|outside|rain today|sunny today/.test(input)){refresh();await weather();return;}
       // Named flowers and follow-up care questions take priority over the app's virtual garden report.
-      const careAnswer=flowerCareReply(input);
+      const askingAboutSavedGarden=/garden status|garden doing|how is my garden|my garden|my flowers|flowers do i have|what flowers|which flowers|flower types|flower list|varieties|still growing|fully bloom|watered|flower growth|growth stage|grow my flowers|happy hours|laugh hours/.test(input)&&!namedFlower(input);
+      const careAnswer=askingAboutSavedGarden?'':flowerCareReply(input);
       if(careAnswer){add('bumble',careAnswer);refresh();return;}
       if(/garden status|garden doing|how is my garden|my garden|my flowers|flowers do i have|what flowers|which flowers|flower types|flower list|varieties|species|still growing|fully bloom|watered|flower growth|growth stage|grow my flowers|when did i laugh|laugh.*most|most.*laugh|when am i happy|when am i happiest|what hour|which hour|happy hours|laugh hours|happiest hour|time of day|happiness pattern/.test(input)){
         add('bumble',gardenReport(input));refresh();return;
