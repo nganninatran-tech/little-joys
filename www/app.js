@@ -612,6 +612,9 @@
     const circle=(x,y,r,c)=>'<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+c+'"/>';
     const repeat=(n,f)=>Array.from({length:n},(_,i)=>f(i)).join('');
     const radial=(n,rx,ry,c,offset=28,shift=0)=>repeat(n,i=>pet(50,offset,rx,ry,c,i*360/n+shift));
+    const littleBloom=(x,y,color,r=5,mid='#f3d77e')=>repeat(5,i=>{const a=i*Math.PI*2/5;return pet(x+Math.sin(a)*r*.69,y-Math.cos(a)*r*.69,r*.52,r*.8,color,i*72);})+circle(x,y,r*.38,mid);
+    const pointed=(n,color,length=28,width=12)=>repeat(n,i=>'<path d="M50 50Q'+(50-width)+' '+(50-length*.65)+' 50 '+(50-length)+'Q'+(50+width)+' '+(50-length*.65)+' 50 50Z" fill="'+color+'" stroke="'+color+'" stroke-width=".8" transform="rotate('+(i*360/n)+' 50 50)"/>');
+
     let head='',stem='',leaves='',accent='';
     const normalStem=()=>{stem=path('M50 55 Q47 82 50 121','none','#76966a',3.5);leaves=path('M49 96Q20 76 23 100Q38 108 49 99','#91b582')+path('M50 105Q79 81 77 102Q65 115 50 108','#82a473');};
     const bell=(x,y,c)=>path('M'+(x-7)+' '+(y-9)+' Q'+x+' '+(y-16)+' '+(x+7)+' '+(y-9)+' L'+(x+8)+' '+(y+3)+' Q'+x+' '+(y+12)+' '+(x-8)+' '+(y+3)+' Z',c,'#9b9ab2');
@@ -623,45 +626,59 @@
         break;
       case 1: // Violet — asymmetrical purple heart-shaped petals
         head=pet(34,39,15,13,'#8b78c0',-22)+pet(64,39,15,13,'#9b8ad0',18)+pet(50,30,12,15,'#a89ada')+pet(37,61,16,14,'#9178be',22)+pet(64,60,16,15,'#947ac0',-24)+circle(50,52,7,'#f2e4b1');break;
-      case 2: // Forget-me-not — sprays of tiny five-petal blue flowers
-        stem=path('M50 121Q54 81 46 48M49 87Q29 64 28 38M50 75Q68 48 74 28','none','#7fa27a',3);
-        leaves=path('M49 93Q23 72 26 92Q40 104 49 99','#96b68b');
-        head=repeat(9,i=>{const x=26+(i%3)*23+(i%2)*3,y=25+Math.floor(i/3)*19;return repeat(5,k=>pet(x,y-6,4.3,6.8,'#94c8ed',k*72))+circle(x,y,3,'#f7d66c');});break;
-      case 3: // Bluebell — arching blue bell sprays
-        stem=path('M48 122Q43 61 66 29','none','#71997a',3);
-        head=repeat(6,i=>{const x=65-i*5,y=30+i*10;return path('M'+x+' '+y+'q-5 5 -5 12q-9 12 -12 1q-5 -5 -1 -9q5 -9 18 -10Z','#8d9fd4','#657bb2');});break;
-      case 4: // Lily of the valley — small white bell clusters
-        stem=path('M49 123Q62 83 53 29','none','#719b67',3);
-        head=repeat(7,i=>{const side=i%2?-1:1,x=55+side*(12+i%3*3),y=32+i*10;return path('M54 '+(y-6)+'Q'+x+' '+(y-2)+' '+x+' '+(y+2),'none','#88a677',1.7)+bell(x,y,'#f9fcf2');});break;
-      case 5: // Crocus — six vertical tapered tepals
-        head=repeat(6,i=>path('M50 72Q'+(30+i*6)+' 39 '+(38+i*5)+' 17Q'+(50+i)+' 37 50 72Z',i%2?'#b19bd3':'#ccbae7','#a999ca'));accent=path('M50 62V30','none','#e8ad42',3);break;
+      case 2: // Forget-me-not: loose sprays of small blue five-petaled flowers
+        stem=path('M50 121Q54 80 46 44M49 88Q29 65 28 40M49 75Q68 50 74 32','none','#7a9c72',3);
+        leaves=path('M48 94Q20 76 27 96Q41 106 49 99','#8cad83');
+        head=[[29,38],[48,28],[69,33],[39,51],[61,52],[25,66],[49,69],[73,67],[43,86]].map(([x,y])=>littleBloom(x,y,'#85b9df',7,'#edcc69')).join('');
+        break;
+      case 3: // Bluebell: arching stem with downward-facing blue bells
+        stem=path('M46 123Q41 65 68 28','none','#729678',3.1);
+        leaves=path('M48 104Q30 75 35 74Q51 87 51 110','#82aa7d');
+        head=repeat(6,i=>{const x=67-i*6.2,y=30+i*11;return path('M'+x+' '+y+'Q'+(x+13)+' '+(y+4)+' '+(x+9)+' '+(y+14),'none','#739978',1.4)+path('M'+(x+1)+' '+(y+12)+'Q'+(x-7)+' '+(y+16)+' '+(x-4)+' '+(y+27)+'Q'+(x+4)+' '+(y+34)+' '+(x+11)+' '+(y+24)+'Q'+(x+15)+' '+(y+16)+' '+(x+1)+' '+(y+12)+'Z','#8298d1','#6f83b4');});
+        break;
+      case 4: // Lily of the valley: suspended ivory bells and broad leaf
+        stem=path('M48 122Q56 85 56 24','none','#75996d',3);
+        leaves=path('M45 112Q18 82 31 59Q49 68 50 110Z','#91b481')+path('M55 113Q83 85 71 69Q53 77 53 111Z','#86aa78');
+        head=repeat(7,i=>{const x=55+(i%2?18:-17),y=29+i*10;return path('M55 '+(y-6)+'Q'+x+' '+(y-8)+' '+x+' '+y,'none','#739976',1.5)+bell(x,y,'#fffdf3');});
+        break;
+      case 5: // Crocus: six upward violet tepals surrounding orange stamens
+        stem=path('M50 75Q50 103 50 122','none','#78976d',3);
+        leaves=path('M48 117Q32 92 39 83Q48 90 52 118','#7fa76f')+path('M52 120Q67 91 61 84Q52 93 50 118','#98b87e');
+        head=pointed(6,'#baa6dc',36,15)+path('M50 61L48 27M52 59L55 31','none','#e4ad50',3.2)+circle(50,39,4,'#f1c36b');
+        break;
       case 6: // Daffodil — trumpet center with six pointed petals
         head=radial(6,12,19,'#f2df85',24,30)+circle(50,50,15,'#f5bd48')+path('M39 44Q50 36 61 44L64 57Q50 66 36 57Z','#efa741','#ce8c37');break;
       case 7: // Daisy — slender white rays and yellow disk
         head=radial(15,6,18,'#fff9ec',27)+circle(50,50,14,'#edc566')+circle(47,46,3,'#f6e6a0');break;
-      case 8: // Freesia — angled stem with trumpet blossoms
-        stem=path('M49 121Q52 74 33 26','none','#78976a',3);
-        head=repeat(5,i=>{const x=34+i*9,y=30+i*12;return path('M'+(x-7)+' '+(y+7)+'Q'+(x-20)+' '+(y-10)+' '+x+' '+(y-12)+'Q'+(x+11)+' '+(y-8)+' '+(x+8)+' '+(y+8)+'Z',i%2?'#f7d5a7':'#f5e3c3','#e7bb8e')+circle(x-3,y,3,'#f8bd79');});break;
+      case 8: // Freesia: curved inflorescence and flared funnel blossoms
+        stem=path('M49 122Q59 75 32 26','none','#78976a',3);
+        leaves=path('M49 115Q22 87 31 74Q47 83 53 117','#91ab7d');
+        head=repeat(5,i=>{const x=31+i*11,y=27+i*13;return path('M'+(x-4)+' '+(y+13)+'Q'+(x-18)+' '+(y-5)+' '+(x-3)+' '+(y-12)+'Q'+(x+7)+' '+(y-17)+' '+(x+14)+' '+(y-2)+'Q'+(x+14)+' '+(y+11)+' '+(x-4)+' '+(y+13)+'Z',i%2?'#f4d7ac':'#fff0c9','#dfbd8e')+circle(x+3,y+1,3,'#e8ba69');});
+        break;
       case 9: // Tulip — upright goblet
         head=path('M28 58Q22 38 29 23Q39 30 50 39Q60 23 70 22Q79 44 72 58Q65 79 50 79Q33 78 28 58Z','#eca7a5','#d78d92')+path('M43 70Q39 42 49 26Q62 41 58 71Z','#f5c7b7','#dba7a2');break;
-      case 10: // Garden pink / Dianthus — five frilled serrated petals
-        head=repeat(6,i=>path('M48 50L39 20l6 5 5-8 5 8 6-5-2 30Z','#e9a4bb','#cf86a2').replace('M48 50','M50 50').replace('<path ','<path transform="rotate('+(i*60)+' 50 50)" '))+circle(50,50,8,'#a76d92');break;
+      case 10: // Dianthus: frilled petal edges, compact pink flower
+        head=repeat(6,i=>path('M50 50L35 24l5 1 2-7 5 5 5-7 5 7 7-3-2 30Z','#e6a1b8','#ce83a4').replace('<path ','<path transform="rotate('+(i*60)+' 50 50)" '))+circle(50,50,7,'#ac789a');
+        break;
       case 11: // Pansy — contrasting blotches on broad petals
         head=pet(34,36,17,16,'#9376bb',-22)+pet(66,36,17,16,'#9f87c9',22)+pet(50,28,15,18,'#b2a2d4')+pet(35,61,17,19,'#e3bc5e',-25)+pet(65,61,17,19,'#e6c671',25)+circle(50,49,9,'#553f79')+circle(50,51,3,'#e7ca68');break;
       case 12: // Sunflower — densely spaced golden rays, brown seed head
         head=radial(19,7,19,'#f3c44f',25)+circle(50,50,19,'#735135')+repeat(10,i=>circle(40+(i%5)*5,42+Math.floor(i/5)*11,1.4,'#d3a665'));break;
-      case 13: // Goldenrod — plume of golden tiny buds
-        stem=path('M48 121Q45 80 52 26','none','#75936c',3);
-        head=repeat(31,i=>{const row=Math.floor(i/6),col=i%6,x=50+(col-2.7)*(3+row*.7),y=25+row*8;return circle(x,y,2.2+(i%3)*.35,'#e6b651');});break;
-      case 14: // Coreopsis — bright ray petals with scalloped tips
-        head=repeat(9,i=>path('M50 49Q33 34 35 21Q39 17 43 22Q51 13 58 23Q64 38 50 49Z','#f3ce63','#dbae4c').replace('<path ','<path transform="rotate('+(i*40)+' 50 50)" '))+circle(50,50,11,'#ad7344');break;
+      case 13: // Goldenrod: branching golden plume rather than a solitary daisy
+        stem=path('M49 122Q44 82 51 23','none','#73926a',3);
+        head=repeat(8,i=>{const y=33+i*8.4,span=9+i*2.8;return path('M50 '+y+'Q'+(50-span/2)+' '+(y-3)+' '+(50-span)+' '+(y-8),'none','#7f9e6a',1.1)+path('M50 '+y+'Q'+(50+span/2)+' '+(y-5)+' '+(50+span)+' '+(y-10),'none','#7f9e6a',1.1)+repeat(3,j=>circle(50-span+(j*3.6),y-8+j*.6,2,'#e7b84d')+circle(50+span-(j*3.6),y-10+j*.7,2,'#eac052'));});
+        break;
+      case 14: // Coreopsis: sunny toothed yellow rays and brown center
+        head=repeat(9,i=>path('M50 51Q36 33 36 23L41 25L44 18L51 24L57 18L60 26Q66 39 50 51Z','#eec964','#d8a74b').replace('<path ','<path transform="rotate('+(i*40)+' 50 50)" '))+circle(50,50,11,'#a87540');
+        break;
       case 15: // Peony — many ruffled layers
         head=radial(7,15,19,'#e8a8b1',25)+radial(9,10,14,'#f1c2c7',35,10)+radial(7,7,10,'#f8d4d3',41)+circle(50,50,6,'#dfaa89');break;
       case 16: // Orchid — bilateral wing petals and ornate lip
         head=pet(28,37,18,12,'#dab8d9',-26)+pet(72,37,18,12,'#dab8d9',26)+pet(50,23,15,18,'#dfc0e0')+pet(30,61,17,12,'#c9a3cf',24)+pet(70,61,17,12,'#c9a3cf',-24)+path('M40 47Q50 53 60 47Q66 74 50 83Q34 74 40 47Z','#a873b1','#8d6098')+circle(50,56,5,'#f4d08c');break;
-      case 17: // Gladiolus — vertical series of open funnel flowers
-        stem=path('M50 123Q53 60 48 14','none','#76996a',3);
-        head=repeat(6,i=>{const y=23+i*14,x=50+(i%2?12:-12);return repeat(4,k=>pet(x,y-7,6,10,i%2?'#e7a7b3':'#f1babf',k*90))+circle(x,y,3,'#e9d096');});break;
+      case 17: // Gladiolus: alternating blossoms on a tall, single spike
+        stem=path('M50 123Q50 70 49 18','none','#77996a',3);
+        head=repeat(6,i=>{const y=26+i*14,x=50+(i%2?13:-13);return repeat(5,k=>{const a=k*Math.PI*2/5;return pet(x+Math.sin(a)*9,y-Math.cos(a)*9,6,10,i%2?'#e3a2b4':'#efb4c0',k*72)})+circle(x,y,3.4,'#f1d29b');});
+        break;
       case 18: // Pink rose — overlapping inner spiral and rounded outer petals
         head=radial(6,15,18,'#e6a7ab',29)+radial(7,11,13,'#f1b7b8',36,13)+path('M43 50Q44 36 55 39Q66 46 55 57Q43 61 44 51Q46 45 54 47','none','#c97f91',3)+circle(50,53,5,'#f0c2b8');break;
       case 19: // Lavender — purple flowering stalk
@@ -671,9 +688,11 @@
         head=pet(50,27,12,26,'#a4a7d4')+pet(31,37,10,20,'#9ba1cf',-35)+pet(69,37,10,20,'#9ba1cf',35)+path('M43 49Q17 44 19 71Q30 93 47 60Z','#778fbe','#7586ab')+path('M57 49Q83 44 81 71Q70 93 53 60Z','#8395c4','#7586ab')+path('M43 47Q50 43 57 47L52 66L48 66Z','#e5c575');break;
       case 21: // Sweet pea — butterfly wing pairs and curved banner
         head=pet(31,37,20,17,'#d1a6cb',-28)+pet(67,37,20,17,'#e4b8d6',26)+path('M34 53Q27 30 47 27Q63 23 66 53Q57 70 50 60Q41 70 34 53Z','#e5bbd5','#c79abf')+path('M42 53Q48 57 50 72Q54 56 61 53','none','#ad77ad',3);break;
-      case 22: // Hyacinth — tightly packed tiny star blossoms
-        stem=path('M50 122V31','none','#749570',4);
-        head=repeat(30,i=>{const y=21+Math.floor(i/5)*10,x=28+(i%5)*11;return repeat(5,k=>pet(x,y-3,2.6,4.8,i%2?'#b39bcf':'#c3a9dc',k*72))+circle(x,y,1.7,'#f9ebcf');});break;
+      case 22: // Hyacinth: dense cylindrical cluster of small lilac star florets
+        stem=path('M50 121V26','none','#77996d',4);
+        leaves=path('M48 121Q27 90 36 72Q49 84 51 121','#83a977')+path('M51 121Q72 92 66 70Q51 86 50 121','#93b283');
+        head=repeat(7,i=>repeat(4,j=>{const x=30+j*13+(i%2?5:0),y=23+i*10;return littleBloom(x,y,i%2?'#a994cd':'#b8a6db',7,'#f4e5be');}));
+        break;
       case 23: // Aster — star of slender lilac rays
         head=radial(21,4.6,18,'#b9a6d9',28)+circle(50,50,12,'#e8bf65')+circle(47,46,3,'#f9e1a0');break;
     }
