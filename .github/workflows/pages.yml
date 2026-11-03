@@ -1,4 +1,5 @@
 name: Publish Little Joys to GitHub Pages
+# Publish the existing www directory; leave Netlify unchanged.
 
 on:
   push:
