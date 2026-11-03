@@ -938,30 +938,42 @@
     }
     function water(onGrow){
       ensure();
-      if(!enabled){
-        onGrow?.();
-        return;
-      }
+      if(!enabled){onGrow?.();return;}
       if(busy){onGrow?.();return;}
+      const gardenScene=document.querySelector('.lj-garden-scene');
+      const flowers=[...(gardenScene?.querySelectorAll('.lj-flower')||[])];
+      const visible=flowers.filter(f=>{const r=f.getBoundingClientRect();return r.bottom>145&&r.top<bounds().h-155;});
+      const target=(visible.find(f=>!f.classList.contains('lj-stage-3'))||visible[0]||flowers[0]);
+      if(!target){onGrow?.();say('First plant a flower, then I can water it!');return;}
       busy=true;
-      const target=[...document.querySelectorAll('.lj-garden-scene .lj-flower')].find(x=>!x.classList.contains('lj-stage-3'))||document.querySelector('.lj-garden-scene .lj-flower');
+      const rect=target.getBoundingClientRect();
       const {w,h}=bounds();
-      const rect=target?.getBoundingClientRect();
-      const x=rect?rect.left+rect.width/2+7:w*.52; // Left-pointing spout aligns above the flower
-      const y=rect?rect.top-63:h*.4;
+      // Align Bumble's left-facing watering-can spout above a visible flower.
+      const x=Math.max(14,Math.min(w-82,rect.left+rect.width/2+30));
+      const y=Math.max(104,Math.min(h-180,rect.top-42));
       node.classList.add('lj-companion-flying','lj-companion-watering');
       say('A little water for your joy!');
       move(x,y);
       clearTimeout(waterTimer);
+      const from=node.getBoundingClientRect(),travel=Math.hypot(x-from.left,y-from.top);
+      const flightMs=calm()?50:Math.min(1850,Math.max(700,travel*3.0));
       waterTimer=setTimeout(()=>{
+        if(!enabled){busy=false;onGrow?.();return;}
+        node?.classList.remove('lj-companion-flying');
         node?.classList.add('lj-companion-pouring');
         onGrow?.();
+        const burst=document.createElement('span');
+        burst.className='lj-flower-water-burst';
+        burst.textContent='💧 💧';
+        target.appendChild(burst);
         waterTimer=setTimeout(()=>{
-          node?.classList.remove('lj-companion-pouring','lj-companion-watering','lj-companion-flying');
+          burst.remove();
+          node?.classList.remove('lj-companion-pouring','lj-companion-watering');
           busy=false;
-          roam(false);
-        },1350);
-      },calm()?50:900);
+          // Return to an unobtrusive edge, rather than sitting across the garden note.
+          move(w-79,Math.max(110,Math.min(h-190,155)));
+        },1150);
+      },flightMs+100);
     }
     function toggle(){
       enabled=!enabled;
