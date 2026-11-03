@@ -1237,19 +1237,20 @@
       const intent=/grow|care|plant|sun|shade|light|water|soil|fertili|feed|bloom|season|flower|pet|dog|cat|toxic|poison|safe|prun|trim|cut|deadhead|seed|sow|pest|diseas|yellow|wilt|brown|dying|not blooming|indoors|pot|container|winter|frost|meaning|symbol|fact|interesting|tell me about|help/.test(input);
       // Do not intercept general garden status or flower counts.
       if(!explicit&&!intent)return '';
-      const topic=/poison|toxic|pet|dog|cat|safe/.test(input)?'safety':
-        /sun|shade|light|window/.test(input)?'sun':
-        /water|thirst|dry|sogg|wet|wilt/.test(input)?'water':
-        /soil|drain|compost|fertili|feed|ph\b/.test(input)?'soil':
-        /when.*(bloom|flower)|bloom.*when|season|month/.test(input)?'season':
-        /prun|trim|cut|deadhead|propagat|seed|sow|plant|pot|container|winter|frost/.test(input)?'tip':
-        /not bloom|no flower|yellow|brown|dying|pest|diseas|problem/.test(input)?'trouble':
-        /meaning|symbol|represent/.test(input)?'meaning':'overview';
+      const question=explicit?cleanFlowerName(input).replace(cleanFlowerName(explicit),' '):input;
+      const topic=/poison|toxic|pet|dog|cat|safe/.test(question)?'safety':
+        /sun|shade|light|window/.test(question)?'sun':
+        /water|thirst|dry|sogg|wet|wilt/.test(question)?'water':
+        /soil|drain|compost|fertili|feed|ph\b/.test(question)?'soil':
+        /when.*(bloom|flower)|bloom.*when|season|month/.test(question)?'season':
+        /not bloom|won.t bloom|no flower|yellow|brown|dying|wilt|pest|diseas|problem/.test(question)?'trouble':
+        /prun|trim|cut|deadhead|propagat|seed|sow|plant|pot|container|winter|frost/.test(question)?'tip':
+        /meaning|symbol|represent/.test(question)?'meaning':'overview';
       let flower=explicit;
       if(!flower&&/another|random|surprise|flower fact|tell me about a flower/.test(input)){
         flower=flowerCare[Math.floor(Math.random()*flowerCare.length)][0];
       }
-      if(!flower&&lastCareFlower)flower=lastCareFlower;
+      if(!flower&&lastCareFlower&&/^(how|what|when|why|where|can|should|is|are|does|do|and|more about|tell me more)\\b/.test(input)&&!/(grow|plant|care for) [a-z]+/.test(input))flower=lastCareFlower;
       if(!flower){
         for(let i=messages.length-2;i>=0;i--){if(messages[i].who==='you'){flower=namedFlower(messages[i].text);if(flower)break;}}
       }
@@ -1263,7 +1264,7 @@
       if(topic==='water')return name+' watering: '+water+'. Check the soil before watering; pots dry faster than beds. '+tip;
       if(topic==='soil')return name+' soil: '+soil+'. '+tip;
       if(topic==='season')return name+' flowering season: '+season+'. Timing depends on climate and variety. '+tip;
-      if(topic==='safety')return name+' and pets: '+caution+'. Please confirm the exact botanical name with a veterinarian or reliable toxic-plant database before letting pets near it.';
+      if(topic==='safety')return name+' and pets: '+caution+'. Please confirm the botanical name with a veterinarian or reliable toxic-plant database. If your pet ate a potentially toxic plant, call a veterinarian promptly.';
       if(topic==='tip')return 'Growing '+name+': '+tip+' Light: '+sun+'. Soil: '+soil+'.';
       if(topic==='trouble')return 'Troubleshooting '+name+': Start by checking sunlight ('+sun.toLowerCase()+'), drainage ('+soil.toLowerCase()+') and moisture ('+water.toLowerCase()+'). '+tip+' If you tell me what the leaves or buds look like, I can help narrow down common causes.';
       if(topic==='meaning')return name+(meaning?' often symbolizes '+meaning+' in some flower traditions. ':' has meanings that vary across traditions. ')+tip;
@@ -1357,8 +1358,7 @@
       if(savedGardenQuestion){add('bumble',gardenReport(input));refresh();return;}
       if(/joke|make me laugh|make me smile/.test(input)){add('bumble',jokes[jokeIndex++%jokes.length]);refresh();return;}
       // Named flowers and follow-up care questions take priority over the app's virtual garden report.
-      const askingAboutSavedGarden=/garden status|garden doing|how is my garden|my garden|my flowers|flowers do i have|what flowers|which flowers|flower types|flower list|varieties|still growing|fully bloom|watered|flower growth|growth stage|grow my flowers|happy hours|laugh hours/.test(input)&&!namedFlower(input);
-      const careAnswer=askingAboutSavedGarden?'':flowerCareReply(input);
+      const careAnswer=flowerCareReply(input);
       if(careAnswer){add('bumble',careAnswer);refresh();return;}
       if(/garden status|garden doing|how is my garden|my garden|my flowers|flowers do i have|what flowers|which flowers|flower types|flower list|varieties|species|still growing|fully bloom|watered|flower growth|growth stage|grow my flowers|when did i laugh|laugh.*most|most.*laugh|when am i happy|when am i happiest|what hour|which hour|happy hours|laugh hours|happiest hour|time of day|happiness pattern/.test(input)){
         add('bumble',gardenReport(input));refresh();return;
