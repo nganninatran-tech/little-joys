@@ -699,3 +699,30 @@ body{background:radial-gradient(circle at 13% 15%,#fff0b4 0,transparent 32%),rad
 @media(prefers-reduced-motion:no-preference){
  .lj-garden-scene .lj-flower:not(.lj-growing){transition:transform .35s ease,filter .35s ease}
 }
+
+/* Forever Garden: keep every flower, explore freely like an illustrated map. */
+.lj-timeline-shell{margin:14px 0 4px;border:1px solid #e5d5b0;border-radius:20px;overflow:hidden;background:#fff7df}
+.lj-timeline-toolbar{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:7px;padding:9px 10px;background:#fff9e8;border-bottom:1px solid #e8dcbf;color:#886d45;font-size:11px;font-weight:650}
+.lj-timeline-toolbar>div{display:flex;gap:5px;flex-shrink:0}
+.lj-timeline-toolbar button{border:1px solid #e4d2aa;background:#fffdf3;color:#795a33;border-radius:11px;min-width:34px;min-height:34px;padding:5px 9px;font-size:16px;font-weight:700}
+.lj-timeline-toolbar button:last-child{font-size:11px;padding:5px 10px}
+.lj-timeline-viewport{position:relative;height:405px;max-height:min(56vh,480px);overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;scrollbar-width:thin;scrollbar-color:#d2bf96 transparent}
+.lj-timeline-spacer{position:relative;min-width:100%;min-height:100%}
+.lj-timeline-world{position:absolute;top:0;left:0;transform-origin:top left;overflow:hidden;isolation:isolate;background:#fff4d8}
+.lj-timeline-world .lj-flower{position:absolute;width:66px;height:87px;transform:translate(-50%,-65%) rotate(var(--flower-rotate,0deg)) scale(var(--flower-size,1));transform-origin:50% 75%;border:0;background:transparent;padding:0;filter:drop-shadow(0 4px 3px #718c6840)}
+.lj-timeline-world .lj-flower svg{width:100%;height:100%;overflow:visible}
+.lj-timeline-world .lj-flower:focus-visible{outline:2px solid #ae8b55;outline-offset:3px;border-radius:10px}
+.lj-timeline-world .lj-flower:hover{filter:drop-shadow(0 4px 6px #718c6877)}
+.lj-timeline-date{position:absolute;z-index:6;left:21px;padding:6px 12px;font:600 13px Georgia,serif;border-radius:99px;background:#fff9eddd;color:#896a43;border:1px solid #eadab7;pointer-events:none}
+.lj-timeline-empty{position:absolute;top:170px;left:100px;width:300px;z-index:3;border-radius:15px;padding:15px;background:#fff8ecdd;color:#826841;font:18px Georgia,serif;text-align:center}
+.lj-timeline-help{font-size:11px;color:#8b724d;padding:9px 12px;margin:0;background:#fff9eb;line-height:1.4}
+.lj-garden-actions{display:flex;flex-wrap:wrap;gap:8px;margin:13px 0 7px}
+.lj-garden-camera{display:flex;align-items:center;justify-content:center;gap:8px;flex:1;min-height:46px;border-radius:14px;border:1px solid #e5c985;background:#ffe9a7;color:#77552b;font-size:12px;font-weight:700;padding:9px}
+.lj-garden-camera.secondary{background:#fffaf0;border-color:#e5d7b7}
+.lj-companion-photographer:after{content:"📸";position:absolute;bottom:-7px;left:-17px;font-size:23px;z-index:5;transform:rotate(-9deg)}
+.lj-companion-flash:before{content:"";position:fixed;z-index:20;inset:-100vh;pointer-events:none;background:#fff6d5;animation:lj-camera-flash .55s ease-out both}
+@keyframes lj-camera-flash{0%{opacity:0}15%{opacity:.8}100%{opacity:0}}
+.lj-flower-water-burst{position:absolute;top:8px;left:-11px;font-size:14px;white-space:nowrap;pointer-events:none;animation:lj-water-drop-fall 1.1s ease-out both}
+@keyframes lj-water-drop-fall{0%{transform:translateY(-20px);opacity:0}25%{opacity:1}100%{transform:translateY(31px);opacity:0}}
+@media(max-width:420px){.lj-timeline-viewport{height:405px;max-height:52vh}.lj-timeline-toolbar>span{font-size:10px}.lj-garden-actions{flex-direction:column}}
+@media(prefers-reduced-motion:reduce){.lj-companion-flash:before,.lj-flower-water-burst{animation:none!important}}
