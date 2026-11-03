@@ -786,3 +786,18 @@ body{background:radial-gradient(circle at 13% 15%,#fff0b4 0,transparent 32%),rad
 .lj-garden-weather-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 12px;background:#fff9ec;color:#806844;font-size:11px}
 .lj-garden-weather-row button{flex-shrink:0;background:#ffedbe;border:1px solid #e3ca8e;border-radius:12px;padding:7px 10px;color:#735835;font-size:11px;font-weight:650;cursor:pointer}
 @media(max-width:420px){.lj-fixed-garden .lj-timeline-viewport{height:400px;max-height:none}.lj-fixed-garden .lj-timeline-world .lj-flower{width:69px;height:96px}.lj-fixed-garden .lj-week-label{font-size:9px}.lj-fixed-garden .lj-sky-orb{width:48px;height:48px}}
+
+/* Simple cheerful cartoon garden, matching the approved storybook direction. */
+.lj-fixed-garden .lj-landscape{opacity:1!important;filter:none!important}
+.lj-fixed-garden .lj-meadow-foliage,.lj-fixed-garden .lj-meadow-leaf{display:none!important}
+.lj-fixed-garden .lj-timeline-world .lj-flower{filter:drop-shadow(0 3px 1px #30583a25)}
+.lj-fixed-garden .lj-flower-face{display:block}
+.lj-book-illustration .lj-flower-face,.lj-garden-scene .lj-flower-face{display:none}
+.lj-fixed-garden.lj-time-night .lj-landscape{opacity:1!important;filter:none!important}
+.lj-fixed-garden.lj-time-night .lj-grass-hill{fill:#659b58;stroke:#4d8650}
+.lj-fixed-garden.lj-time-night .lj-garden-bushes{fill:#367451;stroke:#2b5d48}
+.lj-fixed-garden.lj-time-night .lj-garden-tufts{stroke:#346c44}
+.lj-fixed-garden.lj-time-night .lj-timeline-world .lj-flower{filter:brightness(.92) drop-shadow(0 3px 3px #101f4055)}
+.lj-fixed-garden.lj-time-night .lj-timeline-world:before{display:none!important}
+.lj-fixed-garden .lj-landscape-wrap{pointer-events:none}
+.lj-fixed-garden .lj-flower{touch-action:manipulation}
