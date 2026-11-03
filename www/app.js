@@ -810,7 +810,7 @@
   function scene(entries,start){
     const pos=positions(entries),laughs=entries.filter(x=>x.type==='laugh').length;
     const rows=Math.max(1,Math.ceil(pos.length/4));
-    const sceneHeight=Math.max(370,210+rows*108);
+    const sceneHeight=Math.max(370,145+rows*108);
     const flowers=pos.map(({m,x,y,s,row})=>{
       const stage=growthStage(m,entries),sp=FLOWER_CLOCK[new Date(m.timestamp).getHours()];
       const twist=(rnd(m.id,'twist')-.5)*9;
