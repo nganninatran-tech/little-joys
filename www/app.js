@@ -705,7 +705,7 @@
     const discovered=counts.filter(Boolean).length;
     return '<section class="lj-flowerbook"><span class="eyebrow">THE LITTLE JOYS FLOWER CLOCK</span><h2>24 hours. 24 meaningful blooms.</h2><p>One real flower for every hour, each with its own traditional symbolic meaning.</p><span class="lj-book-count">'+discovered+' of 24 discovered</span><div class="lj-book-grid">'+FLOWER_CLOCK.map(([name,meaning],hour)=>{const label=String(hour%12||12)+(hour<12?' AM':' PM');const example={timestamp:new Date(2026,0,1,hour).toISOString()};return '<div class="lj-book-flower '+(counts[hour]?'discovered':'')+'"><div class="lj-book-illustration">'+flower(example)+'</div><span class="lj-book-hour">'+label+'</span><strong>'+escapeHtml(name)+'</strong><small>'+escapeHtml(meaning)+'</small><span class="lj-book-grown">'+(counts[hour]?counts[hour]+' grown':'Yet to grow')+'</span></div>';}).join('')+'</div><p class="lj-book-note">Flower meanings vary by tradition and culture. Hour assignments are a Little Joys story, not actual blooming schedules.</p></section>';
   }
-  function weeks(){const map=new Map(),now=weekOf(new Date());map.set(weekKey(now),now);for(const m of moments){const d=new Date(m.timestamp);if(!Number.isFinite(d.getTime()))continue;const wk=weekOf(d);map.set(weekKey(wk),wk);}const dates=[...map.values()].sort((a,b)=>b-a);return flowerBook()+'<section class="lj-weeks"><span class="eyebrow">YOUR GARDEN ALBUM</span><h2>Your weeks in bloom.</h2><p>A different little garden for every week. Each flower is a memory you saved.</p>'+dates.map(start=>{const records=items(start),joys=records.filter(x=>x.type==='joy').length,laughs=records.filter(x=>x.type==='laugh').length;return '<article class="lj-week-card"><span class="eyebrow">YOUR WEEK IN BLOOM</span><h3>'+escapeHtml(label(start))+'</h3>'+scene(records,start)+'<p><b>'+joys+'</b> '+(joys===1?'flower':'flowers')+' · <b>'+laughs+'</b> '+(laughs===1?'laugh':'laughs')+'</p><button type="button" class="lj-save" data-garden-week="'+weekKey(start)+'">Save this week’s garden picture ↗</button></article>';}).join('')+'</section>';}
+  function weeks(){const map=new Map(),now=weekOf(new Date());map.set(weekKey(now),now);for(const m of moments){const d=new Date(m.timestamp);if(!Number.isFinite(d.getTime()))continue;const wk=weekOf(d);map.set(weekKey(wk),wk);}const dates=[...map.values()].sort((a,b)=>b-a);return '<section class="lj-weeks"><span class="eyebrow">YOUR GARDEN ALBUM</span><h2>Your weeks in bloom.</h2><p>A different little garden for every week. Each flower is a memory you saved.</p>'+dates.map(start=>{const records=items(start),joys=records.filter(x=>x.type==='joy').length,laughs=records.filter(x=>x.type==='laugh').length;return '<article class="lj-week-card"><span class="eyebrow">YOUR WEEK IN BLOOM</span><h3>'+escapeHtml(label(start))+'</h3>'+scene(records,start)+'<p><b>'+joys+'</b> '+(joys===1?'flower':'flowers')+' · <b>'+laughs+'</b> '+(laughs===1?'laugh':'laughs')+'</p><button type="button" class="lj-save" data-garden-week="'+weekKey(start)+'">Save this week’s garden picture ↗</button></article>';}).join('')+'</section><details class="lj-collection-details"><summary>Explore the Flower Clock — 24 meaningful flowers</summary>'+flowerBook()+'</details>';}
   function settings(){return '<section class="lj-bee-settings"><h2>Meet Bumble</h2><p>Choose how often Bumble shares a gentle message. No pressure, no streaks.</p><div class="lj-tone-options">'+[['chatty','Chatty'],['gentle','Gentle'],['quiet','Quiet']].map(([value,name])=>'<button class="lj-tone '+(tone===value?'chosen':'')+'" data-garden-tone="'+value+'" type="button" aria-pressed="'+(tone===value)+'">'+name+'</button>').join('')+'</div></section>';}
   function recapSvg(start,entries){const pos=positions(entries),n=pos.length,laughs=entries.filter(m=>m.type==='laugh').length;let floral='';for(const {m,x,y,s} of pos){const xx=40+x*8.8,yy=230+Math.max(25,y)*3.2,scale=.6*s;floral+='<g transform="translate('+xx.toFixed(0)+' '+yy.toFixed(0)+') scale('+scale.toFixed(2)+') translate(-50 -60)">'+flower(m).replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'')+'</g>';}const title=escapeHtml(label(start));return '<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640"><rect width="960" height="640" fill="#fff4cc"/><rect x="24" y="24" width="912" height="592" rx="32" fill="#fffaf0" stroke="#dfc794" stroke-width="3"/><text x="480" y="98" font-family="Georgia,serif" font-size="42" text-anchor="middle" fill="#76572f">Your week in bloom</text><text x="480" y="139" font-family="Georgia,serif" font-size="23" text-anchor="middle" fill="#9b7b50">'+title+'</text><circle cx="777" cy="227" r="65" fill="#ffe49a"/><path d="M24 470Q200 370 405 464T936 460V610H24Z" fill="#d2dcb7"/><path d="M24 523Q280 420 510 508T936 497V610H24Z" fill="#b9d09a"/>'+floral+(laughs?'<text x="130" y="240" fill="#d7ae58" font-size="35">✧ ✦ ✧</text>':'')+'<text x="480" y="580" font-family="Georgia,serif" font-size="22" text-anchor="middle" fill="#82643e">'+n+' flowers · '+laughs+' laughs · Little Joys (: </text></svg>';}
   async function save(key){const start=new Date(key+'T00:00:00');if(!Number.isFinite(start.getTime()))return;let url;try{const blob=new Blob([recapSvg(start,items(start))],{type:'image/svg+xml'});url=URL.createObjectURL(blob);const image=new Image();await new Promise((ok,no)=>{image.onload=ok;image.onerror=no;image.src=url;});const canvas=document.createElement('canvas');canvas.width=960;canvas.height=640;canvas.getContext('2d').drawImage(image,0,0);const png=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!png)throw new Error('Export failed');const downloadUrl=URL.createObjectURL(png),a=document.createElement('a');a.href=downloadUrl;a.download='little-joys-garden-'+key+'.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(downloadUrl),4000);showToast('Your little garden postcard is saved.');}catch(e){showToast('Could not export this picture on this device.');}finally{if(url)URL.revokeObjectURL(url);}}
@@ -713,24 +713,20 @@
   return {home,weeks,settings,click,celebrateLaugh};
 })();
   function renderToday() {
-    const today=todayMoments(), counts=countTypes(today);
-    return `<div class="date-line">${escapeHtml(dateText(new Date()))}</div>
-      <h1 class="welcome-title">Here's to the <em>little</em> things.</h1>
+    const today=todayMoments(),counts=countTypes(today);
+    return `<div class="lj-home-intro"><span class="eyebrow">YOUR POCKETFUL OF SUNSHINE</span><h1 class="welcome-title">Your little garden.</h1><p>A happy moment plants a flower. A laugh helps it bloom.</p></div>
       ${garden.home()}
-      <section class="hero-card" aria-label="Today's moments">
-        ${smileButton('sunshine-hero')}
-        <div class="hero-top">${icon('sparkle',14)} Your day, in little moments</div>
-        <div class="hero-numbers"><div><div class="hero-number"><strong data-count="laugh">${counts.laugh}</strong><span>little<br>laughs</span></div></div><div><div class="hero-number"><strong data-count="joy">${counts.joy}</strong><span>happy<br>moments</span></div></div></div>
-        <p class="hero-note">Not a score. Just the moments you noticed.</p>
-      </section>
-      <div class="section-heading"><h2>Catch a little moment</h2></div>
-      <div class="moment-actions"><button type="button" class="moment-trigger laugh" data-add="laugh">${icon('laugh',28)}<strong>I laughed</strong><small>Save a little giggle</small></button><button type="button" class="moment-trigger joy" data-add="joy">${icon('heart',28)}<strong>I felt happy</strong><small>Keep this feeling</small></button></div>
-      <button type="button" class="capture-button" data-capture="joy">${icon('camera',22)}<span><strong>Capture a happy moment</strong><small>Take a photo or keep one from your gallery, with a little note</small></span>${icon('arrow',17)}</button>
-      ${hourlySunshineCard()}
-      ${micCard()}
-      <div class="gentle-note">${icon('leaf',17)}<span>You don't have to feel joyful all day. One small moment can still be worth remembering.</span></div>
-      <div class="section-heading"><h2>Today's little memories</h2><button type="button" class="text-link" data-goto="journal">See journal →</button></div>
-      ${today.length?`<div class="moment-list">${today.slice(0,5).map(momentCard).join('')}</div>`:emptyState('A fresh little page','When something makes you laugh or smile, tap above to save it. No pressure.','sun')}
+      <div class="lj-quick-actions">
+        <button type="button" class="moment-trigger joy" data-add="joy">${icon('heart',24)}<strong>I felt happy</strong><small>Plant a flower</small></button>
+        <button type="button" class="moment-trigger laugh" data-add="laugh">${icon('laugh',24)}<strong>I laughed</strong><small>Water your garden</small></button>
+      </div>
+      <button type="button" class="capture-button lj-photo-action" data-capture="joy">${icon('camera',20)}<span><strong>Add a photo memory</strong><small>Optional photo, note and one new flower</small></span>${icon('arrow',16)}</button>
+      <div class="lj-mini-stats"><span><strong data-count="joy">${counts.joy}</strong> happy moments today</span><span><strong data-count="laugh">${counts.laugh}</strong> laughs today</span></div>
+      <div class="lj-today-bottom">
+        <div class="section-heading"><h2>Today's little memories</h2><button type="button" class="text-link" data-goto="journal">See all →</button></div>
+        ${today.length?`<div class="moment-list">${today.slice(0,2).map(momentCard).join('')}</div>`:emptyState('A fresh little page','A lovely moment can bloom whenever it happens.','sun')}
+      </div>
+      <details class="lj-sunshine-details"><summary>More sunshine from Bumble</summary>${hourlySunshineCard()}</details>
     `;
   }
   function filteredMoments() {
@@ -746,6 +742,7 @@
   function renderJournal() {
     return `<span class="eyebrow">YOUR POCKET-SIZED TIME CAPSULE</span><h1 class="page-title">The moments you kept.</h1><p class="page-description">Some days are full. Some are quiet. Every saved moment belongs here.</p>
       <div class="pill-filters" aria-label="Filter your moments"><button class="filter-btn ${journalFilter==='all'?'selected':''}" data-filter="all" aria-pressed="${journalFilter==='all'}">All (${moments.length})</button><button class="filter-btn ${journalFilter==='laugh'?'selected':''}" data-filter="laugh" aria-pressed="${journalFilter==='laugh'}">Little laughs</button><button class="filter-btn ${journalFilter==='joy'?'selected':''}" data-filter="joy" aria-pressed="${journalFilter==='joy'}">Happy moments</button></div>
+      <button type="button" class="lj-share-link" data-goto="together">Share a little moment with someone →</button>
       <label class="search-field">${icon('search',16)}<span class="sr-only">Search memories</span><input id="journal-search" placeholder="Search your little memories" value="${escapeHtml(journalQuery)}" maxlength="100"></label>
       <div id="journal-list">${journalListHtml()}</div>`;
   }
@@ -755,17 +752,17 @@
   }
   function renderPatterns() {
     const week=getWeek();const laughs=week.reduce((n,d)=>n+d.laugh,0);const joys=week.reduce((n,d)=>n+d.joy,0);const days=week.filter(d=>d.items.length).length;const max=Math.max(...week.map(d=>Math.max(d.laugh,d.joy)),1);
-    return `${garden.weeks()}<span class="eyebrow">A GENTLER KIND OF REFLECTION</span><h1 class="page-title">Look at the little things.</h1><p class="page-description">Your past seven days, without goals to hit or streaks to keep.</p>
+    return `${garden.weeks()}<details class="lj-reflections-details"><summary>Gentle reflections from the last 7 days</summary><span class="eyebrow">A GENTLER KIND OF REFLECTION</span><h1 class="page-title">Look at the little things.</h1><p class="page-description">Your past seven days, without goals to hit or streaks to keep.</p>
       <section class="week-card"><div class="subtle-row"><strong style="font-size:13px">A week of moments</strong><span class="eyebrow" style="font-size:9px">LAST 7 DAYS</span></div><p class="week-intro">Only moments you chose to log are shown.</p>
         <div class="week-bars" role="img" aria-label="Over the last seven days, you logged ${laughs} laughs and ${joys} happy moments.">${week.map((d,i)=>`<div class="day-column"><div class="day-total">${d.items.length||''}</div><div class="bar-pair"><div class="bar laugh ${d.laugh?'':'zero'}" style="height:${d.laugh?Math.max(7,d.laugh/max*100):3}%" title="${d.laugh} laughs"></div><div class="bar joy ${d.joy?'':'zero'}" style="height:${d.joy?Math.max(7,d.joy/max*100):3}%" title="${d.joy} happy moments"></div></div><span class="day-name ${i===6?'today':''}">${escapeHtml(d.date.toLocaleDateString(undefined,{weekday:'short'}).slice(0,2))}</span></div>`).join('')}</div>
         <div class="chart-legend"><span><i class="legend-mark laugh"></i>Laughs</span><span><i class="legend-mark joy"></i>Happy moments</span></div>
       </section>
       <div class="insight-grid"><div class="insight-card"><strong>${laughs+joys}</strong><span>little moments saved<br>this week</span></div><div class="insight-card"><strong>${days}<span style="font-family:inherit;font-size:16px"> / 7</span></strong><span>days with at least<br>one saved moment</span></div></div>
-      <div class="reflection-card"><strong>A note to yourself</strong><p>${days===0?'This week is still yours, even without a single entry. There is nothing to catch up on.':'A day with fewer saved moments is not a less happy day. This is a record of what you noticed, not a measure of how much joy you deserve.'}</p></div>`;
+      <div class="reflection-card"><strong>A note to yourself</strong><p>${days===0?'This week is still yours, even without a single entry. There is nothing to catch up on.':'A day with fewer saved moments is not a less happy day. This is a record of what you noticed, not a measure of how much joy you deserve.'}</p></div></details>`;
   }
   function renderTogether() {
     const shared=moments.slice(0,8);
-    return `<span class="eyebrow">GOOD THINGS CAN BE SHARED</span><h1 class="page-title">A little joy, for someone.</h1><div class="people-header"><span class="eyebrow">THINKING OF YOU</span><h2>Send a little<br>piece of your day.</h2><p>Choose a memory and share it with someone you love. A tiny note can go a long way.</p></div>
+    return `<button type="button" class="lj-share-link" data-goto="journal">← Back to memories</button><span class="eyebrow">GOOD THINGS CAN BE SHARED</span><h1 class="page-title">A little joy, for someone.</h1><div class="people-header"><span class="eyebrow">THINKING OF YOU</span><h2>Send a little<br>piece of your day.</h2><p>Choose a memory and share it with someone you love. A tiny note can go a long way.</p></div>
       <div class="section-heading"><h2>Choose a moment to share</h2></div>
       ${shared.length?shared.map(m=>`<article class="share-card"><div class="share-card-header"><div class="moment-dot ${m.type==='joy'?'joy':''}">${icon(m.type==='laugh'?'laugh':'heart',15)}</div><div><div class="moment-kind">${momentName(m)}</div><div class="moment-meta">${escapeHtml(dateGroupText(new Date(m.timestamp)))}</div></div></div><p>${m.note?escapeHtml(m.note):m.type==='laugh'?'Something made me laugh today.':'Something made me happy today.'}</p>${m.photo?`<img class="share-photo" data-photo-id="${escapeHtml(m.id)}" alt="Photo saved with this moment" loading="lazy">`:''}<div class="share-card-actions"><button type="button" class="outline-button" data-share="${escapeHtml(m.id)}">${icon('share',14)} Share this moment</button></div></article>`).join(''):emptyState('Sharing starts with a moment','Save a little laugh or happy moment on Today, then you can share it here.','hearts')}
       <p class="info-note">Your journal stays private. Only the message you deliberately share leaves the app. This version uses your phone's share menu or copies a message; it does not connect accounts or send automatic alerts.</p>`;
@@ -774,6 +771,7 @@
     return `<span class="eyebrow">MADE TO BE YOURS</span><h1 class="page-title">Your space, your pace.</h1><p class="page-description">Your little moments are yours to keep. This version saves everything on this device, without an account.</p>
       ${garden.settings()}
       ${sunshineSettingsHtml()}
+      <details class="lj-microphone-details"><summary>Experimental laughter listener</summary>${micCard()}</details>
       <div class="section-heading"><h2>Your journal</h2></div>
       <div class="settings-card">
       <button type="button" class="settings-row" data-tool="export">${icon('download',22)}<span><strong>Save a backup</strong><small>Download your journal as a JSON file.</small></span><span class="row-arrow">›</span></button>
@@ -781,7 +779,7 @@
       <button type="button" class="settings-row" data-tool="sample">${icon('sparkle',22)}<span><strong>Try three demo moments</strong><small>Add clearly marked examples to explore the app.</small></span><span class="row-arrow">›</span></button>
       <button type="button" class="settings-row danger" data-tool="clear">${icon('trash',22)}<span><strong>Erase all moments</strong><small>Clear your saved journal from this device.</small></span><span class="row-arrow">›</span></button></div>
       <div class="privacy-box">${icon('shield',21)}<strong> Your privacy matters.</strong><p>The optional microphone experiment processes sound levels locally only when you start it; it never records or uploads audio. No location tracking, no ads, and no account in this prototype. Your notes and photos are stored in this browser only. Your exported backup includes both. Clearing browser data or changing devices may erase them unless you've made a backup.</p></div>
-      <p class="app-version">Little Joys · prototype v1.0 · not a happiness score</p>`;
+      <p class="app-version">Little Joys · sunshine garden v1.2 · not a happiness score</p>`;
   }
   function render() {
     const html={today:renderToday,journal:renderJournal,patterns:renderPatterns,together:renderTogether,you:renderYou};
@@ -794,7 +792,7 @@
   }
   function navigate(tab) {
     if (!['today','journal','patterns','together','you'].includes(tab))return;
-    if(tab!=='today' && (mic.status==='on'||mic.status==='starting'))stopMic(true);
+    if(tab!==currentTab && (mic.status==='on'||mic.status==='starting'))stopMic(true);
     currentTab=tab;render();content.scrollTop=0;
   }
   const photoPreview=document.querySelector('#photo-preview');
